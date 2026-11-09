@@ -1,0 +1,35 @@
+[
+  {
+    "id": "full-body",
+    "name": "Общая подготовка",
+    "description": "Спокойная программа на всё тело.",
+    "ids": [
+      "squat",
+      "incline-push-up",
+      "glute-bridge",
+      "bird-dog",
+      "march-in-place"
+    ]
+  },
+  {
+    "id": "core",
+    "name": "Стабильный корпус",
+    "description": "Упражнения на контроль и устойчивость.",
+    "ids": [
+      "bird-dog",
+      "dead-bug",
+      "plank"
+    ]
+  },
+  {
+    "id": "legs",
+    "name": "Ноги и движение",
+    "description": "Базовые движения для нижней части тела.",
+    "ids": [
+      "squat",
+      "reverse-lunge",
+      "calf-raise",
+      "glute-bridge"
+    ]
+  }
+]
