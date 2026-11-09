@@ -63,6 +63,61 @@
 .mrow+.mrow:before{content:"";position:absolute;top:0;left:64px;right:0;height:1px;background:var(--line)}.mrow:active{background:#ffffff0a}.mrow.danger{color:var(--red)}
 .mico{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:18px;color:#fff;flex-shrink:0}
 .prof-card{padding:18px}.prof-card .profile-big .avatar{width:72px;height:72px;border-radius:50%;font-size:30px}.prof-card .name{font-size:21px;max-width:60vw}
+
+/* ===== Books reader: PDF + EPUB, progress and offline cache ===== */
+.reader-overlay{position:fixed;inset:0;z-index:60;background:#090c15;display:none;flex-direction:column;padding: max(10px,env(safe-area-inset-top)) 12px max(10px,env(safe-area-inset-bottom));}
+.reader-overlay.open{display:flex}
+.reader-head{display:flex;align-items:center;gap:10px;min-height:48px;flex-shrink:0}
+.reader-title{font-size:13px;font-weight:800;min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reader-tools{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:9px 0;flex-shrink:0}
+.reader-stage{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:15px;background:#171c2b;display:flex;justify-content:center;align-items:flex-start;padding:10px}
+#pdfCanvas{display:block;max-width:100%;height:auto;background:white;box-shadow:0 5px 28px #0008}
+#epubStage{width:100%;height:100%;min-height:0;background:#fff;color:#222}
+#epubStage iframe{border:0}
+.reader-status{font-size:10px;color:var(--muted);text-align:center;min-height:16px;padding-top:6px}
+.book-cover{width:52px;height:68px;object-fit:cover;border-radius:9px;background:#121827;border:1px solid var(--line);flex-shrink:0}
+.book-placeholder{width:52px;height:68px;border-radius:9px;display:grid;place-items:center;background:#202a40;border:1px solid var(--line);font-size:23px;flex-shrink:0}
+.book-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.book-actions .btn{padding:8px 10px}
+@media(max-width:420px){.book-actions{flex-direction:column;align-items:stretch}.book-actions .btn{padding:7px 8px}.reader-overlay{padding-left:8px;padding-right:8px}}
+
+/* Monochrome vector icon for the League section */
+.league-nav-icon{display:grid;place-items:center;width:20px;height:20px}
+.league-nav-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.league-mico{background:transparent!important;color:var(--muted)!important}
+.league-mico svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+/* ===== Viril Books: enhanced catalog and comfortable reader ===== */
+.books-intro{padding:14px 15px;background:linear-gradient(135deg,rgba(139,220,255,.10),rgba(181,160,255,.08));border:1px solid var(--line);border-radius:17px}
+.books-intro b{display:block;font-size:14px;margin-bottom:4px}.books-intro p{font-size:11px;line-height:1.5;color:var(--muted);margin:0}
+.book-card{display:flex;gap:12px;padding:12px;align-items:flex-start}
+.book-card .book-cover{width:76px;height:104px;border-radius:10px;box-shadow:0 5px 18px #0004}
+.book-card .book-placeholder{width:76px;height:104px;border-radius:10px;font-size:28px}
+.book-card-main{min-width:0;flex:1}.book-card-title{font-size:14px;line-height:1.35;font-weight:800;overflow-wrap:anywhere}
+.book-card-author{display:block;color:var(--blue);font-size:11px;margin-top:4px}
+.book-card-desc{font-size:11px;line-height:1.45;color:var(--muted);margin-top:7px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.book-card-meta{font-size:10px;color:var(--muted);margin-top:7px}
+.book-card-actions{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}.book-card-actions .btn{padding:8px 10px}
+.reader-overlay{background:#10131b}
+.reader-head{gap:8px}.reader-title{font-size:14px}
+.reader-settings{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:7px;padding:2px 0 9px;flex-shrink:0}
+.reader-settings .btn,.reader-settings select{min-height:34px}
+.reader-setting-select{max-width:125px;padding:7px 9px;border:1px solid var(--line);border-radius:10px;background:#20263a;color:var(--text);font-size:11px}
+.reader-size-label{font-size:10px;color:var(--muted);white-space:nowrap}
+.reader-size-range{width:92px;accent-color:var(--blue)}
+.reader-stage{transition:background .2s,color .2s}
+.reader-stage[data-theme="light"]{background:#f4f1e9;color:#222;border-color:#ddd5c5}
+.reader-stage[data-theme="warm"]{background:#f0e3c9;color:#443522;border-color:#d5c29f}
+.reader-stage[data-theme="dark"]{background:#171c2b;color:#e8eaf0;border-color:var(--line)}
+.reader-stage[data-theme="light"] #epubStage{background:#f4f1e9;color:#222}
+.reader-stage[data-theme="warm"] #epubStage{background:#f0e3c9;color:#443522}
+.reader-stage[data-theme="dark"] #epubStage{background:#171c2b;color:#e8eaf0}
+.reader-stage[data-theme="light"] #pdfCanvas,.reader-stage[data-theme="warm"] #pdfCanvas{box-shadow:0 5px 28px #0003}
+.reader-stage[data-theme="dark"] #pdfCanvas{box-shadow:0 5px 28px #0008}
+#epubStage{overflow:hidden}
+.reader-status{font-size:10px;line-height:1.4;padding:7px 4px 0}
+@media(max-width:420px){.book-card{gap:9px;padding:10px}.book-card .book-cover,.book-card .book-placeholder{width:66px;height:92px}.book-card-actions .btn{font-size:10px}.reader-size-range{width:72px}.reader-setting-select{max-width:105px}}
+
 </style></head>
 <body><div class="app"><canvas id="particles"></canvas><div class="layout">
 <header class="top"><button class="profile-trigger" id="openProfile" aria-label="Открыть профиль"><div class="avatar" id="topAvatar">V</div><div style="min-width:0"><div class="name" id="topName">Viril</div><div class="sub" id="topLevel">Уровень 1 · Новичок</div></div></button><div class="streak-badge" aria-label="Дни активности">🔥 <span id="streakCount">0</span></div></header>
@@ -78,7 +133,7 @@
 </div></div>
 <div class="gview hidden" id="booksView">
 <div class="screen-title-row"><button class="back-btn" id="booksBack">‹ Ресурсы</button><button class="btn" id="booksRefresh">↻ Обновить</button></div>
-<div class="muted">Книги загружаются из Supabase Storage. Выбери книгу, чтобы открыть её.</div>
+<div class="muted">PDF и EPUB открываются прямо в Viril. Скачанные книги доступны офлайн на этом устройстве.</div>
 <div class="scroll-area" id="booksList"><div class="empty">Загружаем библиотеку…</div></div>
 </div>
 </section>
@@ -100,14 +155,27 @@
 <div id="registrationPrompt" class="modal-section"><h3>Сохрани свой прогресс</h3><p>Пройди регистрацию чтобы не потерять свой прогресс</p><button class="btn primary" id="registerGoogle" style="margin-top:10px;width:100%">Продолжить с Google</button></div>
 <div id="editWrap" class="glass list-card hidden"><div class="screen-title-row" style="margin-bottom:10px"><h3 style="margin:0;font-size:14px">Редактирование профиля</h3><button class="close" id="closeProfileEditor" type="button" aria-label="Закрыть редактирование">×</button></div><div id="profileEditor" class="hidden"><label class="form-label" for="nickname">Никнейм</label><input class="field" id="nickname" maxlength="24" placeholder="Viril"><label class="form-label">Иконка профиля</label><div id="avatarChoices" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px"></div><div class="btn-row" style="margin-top:12px"><button class="btn primary" id="saveProfile">Сохранить профиль</button></div></div></div>
 <div class="glass mgroup"><button class="mrow" id="rowEdit"><span class="mico" style="background:#4f6bff">👤</span>Редактировать профиль<span class="chev">›</span></button><button class="mrow" id="rowLogin"><span class="mico" style="background:#6a55d6">🔑</span>Способы входа<span class="chev">›</span></button><button class="mrow" id="changeAccount"><span class="mico" style="background:#14907a">⇄</span>Сменить аккаунт<span class="chev">›</span></button></div>
-<div class="glass mgroup"><button class="mrow" data-go="progress"><span class="mico" style="background:#1f7ae0">▥</span>Аналитика<span class="chev">›</span></button><button class="mrow" data-go="league"><span class="mico" style="background:#c2410c">🏆</span>Лига<span class="chev">›</span></button></div>
+<div class="glass mgroup"><button class="mrow" data-go="league"><span class="mico league-mico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 4h8v4a4 4 0 0 1-8 0V4Z"/><path d="M8 6H5v2a4 4 0 0 0 4 4M16 6h3v2a4 4 0 0 1-4 4M12 12v5m-4 3h8m-7-3h6"/></svg></span>Лига<span class="chev">›</span></button></div>
 <div class="glass mgroup"><button class="mrow" id="openSettings"><span class="mico" style="background:#f58a07">⚙</span>Настройки<span class="chev">›</span></button><button class="mrow" id="resetProgress"><span class="mico" style="background:#5b6178">↺</span>Сбросить игровой прогресс<span class="chev">›</span></button><button class="mrow danger" id="deleteAccount"><span class="mico" style="background:#c43c53">🗑</span>Удалить аккаунт<span class="chev">›</span></button></div>
 <p class="muted" style="padding:0 4px">Сброс прогресса удаляет игровые данные. Удаление аккаунта удаляет учётную запись и связанные с ней данные.</p>
 <div class="glass list-card"><h3 data-i18n="profileBenefits">Твой путь</h3><p class="muted" data-i18n="profileBenefitsText">Каждая выполненная цель — доказательство, что ты можешь положиться на себя. Сравнивай себя только с собой вчерашним.</p></div></div></section>
-<nav class="nav" aria-label="Навигация"><button class="active" data-screen="home"><span class="ni">⌂</span><span data-i18n="home">Главная</span></button><button data-screen="resources"><span class="ni">▤</span><span data-i18n="resources">Ресурсы</span></button><button data-screen="growth"><span class="ni">◇</span><span data-i18n="growth">Развитие</span></button><button data-screen="progress"><span class="ni">▥</span><span data-i18n="progress">Прогресс</span></button><button data-screen="league"><span class="ni">🏆</span><span>Лига</span></button><button data-screen="profile"><span class="ni">○</span><span data-i18n="profile">Профиль</span></button></nav>
+<nav class="nav" aria-label="Навигация"><button class="active" data-screen="home"><span class="ni">⌂</span><span data-i18n="home">Главная</span></button><button data-screen="resources"><span class="ni">▤</span><span data-i18n="resources">Ресурсы</span></button><button data-screen="growth"><span class="ni">◇</span><span data-i18n="growth">Развитие</span></button><button data-screen="progress"><span class="ni">▥</span><span data-i18n="progress">Прогресс</span></button><button data-screen="league"><span class="ni league-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 4h8v4a4 4 0 0 1-8 0V4Z"/><path d="M8 6H5v2a4 4 0 0 0 4 4M16 6h3v2a4 4 0 0 1-4 4M12 12v5m-4 3h8m-7-3h6"/></svg></span><span>Лига</span></button><button data-screen="profile"><span class="ni">○</span><span data-i18n="profile">Профиль</span></button></nav>
 </div></div><div class="toast" id="toast"></div>
+
+<div class="reader-overlay" id="bookReader" aria-hidden="true">
+ <div class="reader-head"><button class="close" id="readerClose" type="button" aria-label="Закрыть книгу">‹</button><div class="reader-title" id="readerTitle">Книга</div><button class="btn" id="readerOffline" type="button">↓ Офлайн</button></div>
+ <div class="reader-tools"><button class="btn" id="readerPrev" type="button">‹ Назад</button><span class="hint" id="readerPage">—</span><button class="btn" id="readerNext" type="button">Вперёд ›</button><button class="btn" id="readerZoomOut" type="button" aria-label="Уменьшить">−</button><button class="btn" id="readerZoomIn" type="button" aria-label="Увеличить">＋</button></div>
+ <div class="reader-settings" id="readerSettings">
+  <span class="reader-size-label" id="readerSizeLabel">Текст 100%</span><input class="reader-size-range" id="readerFontSize" type="range" min="80" max="150" step="5" value="100" aria-label="Размер текста">
+  <select class="reader-setting-select" id="readerTheme" aria-label="Тема чтения"><option value="light">Светлая</option><option value="warm">Тёплая</option><option value="dark" selected>Тёмная</option></select>
+  <select class="reader-setting-select" id="readerLine" aria-label="Межстрочный интервал"><option value="1.35">Строки: тесно</option><option value="1.6" selected>Строки: обычно</option><option value="1.9">Строки: свободно</option><option value="2.2">Строки: широко</option></select>
+  <select class="reader-setting-select" id="readerParagraph" aria-label="Интервал между абзацами"><option value="0.5">Абзацы: тесно</option><option value="1">Абзацы: обычно</option><option value="1.5" selected>Абзацы: свободно</option><option value="2">Абзацы: широко</option></select>
+ </div>
+ <div class="reader-stage" id="readerStage" data-theme="dark"><canvas id="pdfCanvas" class="hidden"></canvas><div id="epubStage" class="hidden"></div><div class="empty" id="readerLoading">Открываем книгу…</div></div>
+ <div class="reader-status" id="readerStatus">Прогресс чтения сохраняется на этом устройстве.</div>
+</div>
 <div class="modal-backdrop" id="modalBackdrop"><div class="modal"><div class="modal-head"><h2 id="modalTitle">Окно</h2><button class="close" id="closeModal" aria-label="Закрыть">×</button></div><div class="modal-content" id="modalContent"></div></div></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/epub.js/0.3.93/epub.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
 (()=>{'use strict';
 // Existing Supabase project credentials and save table are intentionally preserved.
 const SUPABASE_URL='https://pjewrbblgnchzlznlpld.supabase.co';const SUPABASE_KEY='sb_publishable_b1FijMpj7rSLWdPDnyA-XA_tDNBnYFh';const cloud=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
@@ -142,7 +210,7 @@ function renderDiary(){let el=$('diaryEntries');if(!el)return;el.innerHTML=state
 function bindModal(name){if(name==='plans'){document.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>{selectedXP=Number(b.dataset.choice);document.querySelectorAll('[data-choice]').forEach(x=>x.classList.toggle('selected',x===b))});$('createGoal').onclick=()=>{let text=$('newGoalText').value.trim();if(!text){toast('Напиши цель');return}let period=$('goalPeriod').value,xp=selectedXP,penalty=Number($('goalPenalty').value)||5;if(period==='day'){state.goals.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),text,xp,penalty,done:false,penaltyApplied:false,created:Date.now(),period});}else{state.futureGoals=state.futureGoals||[];state.futureGoals.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),text,xp,penalty,period,created:Date.now()})}save();render();$('newGoalText').value='';renderPeriodGoals();toast('Цель добавлена')};document.querySelectorAll('[data-remove-future]').forEach(b=>b.onclick=()=>{state.futureGoals=(state.futureGoals||[]).filter(g=>g.id!==b.dataset.removeFuture);save();renderPeriodGoals()})}if(name==='diary'){$('saveDiary').onclick=()=>{let text=$('diaryText').value.trim();if(!text){toast('Сначала напиши пару слов');return}state.diary.push({id:Date.now(),date:today(),text,audio:''});save();$('diaryText').value='';renderDiary();toast('Запись сохранена')};$('recordVoice').onclick=async()=>{if(recording){recording.stop();return}if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){$('voiceStatus').textContent='Запись голоса не поддерживается этим браузером.';return}try{let stream=await navigator.mediaDevices.getUserMedia({audio:true});recording=new MediaRecorder(stream);audioChunks=[];recording.ondataavailable=e=>{if(e.data.size)audioChunks.push(e.data)};recording.onstop=()=>{let blob=new Blob(audioChunks,{type:'audio/webm'}),reader=new FileReader();reader.onload=()=>{state.diary.push({id:Date.now(),date:today(),text:$('diaryText').value.trim(),audio:reader.result});save();renderDiary();$('voiceStatus').textContent='Голосовая заметка сохранена.'};reader.readAsDataURL(blob);stream.getTracks().forEach(x=>x.stop());recording=null;$('recordVoice').textContent='🎙 Записать голос'};recording.start();$('recordVoice').textContent='■ Остановить запись';$('voiceStatus').textContent='Идёт запись… нажми «Остановить запись», когда закончишь.'}catch(e){$('voiceStatus').textContent='Нет доступа к микрофону. Разреши доступ в настройках браузера.'}}}if(name==='focus'){document.querySelectorAll('[data-minutes]').forEach(b=>b.onclick=()=>{stopTimer();focusMode=b.dataset.mode;focusRemaining=Number(b.dataset.minutes)*60;updateTimer()});$('timerStart').onclick=()=>{if(focusInterval){stopTimer();$('timerStart').textContent='▶ Продолжить';return} $('timerStart').textContent='Ⅱ Пауза';focusInterval=setInterval(()=>{focusRemaining--;updateTimer();if(focusRemaining<=0){stopTimer();if(focusMode==='work'){state.focusSessions=(state.focusSessions||0)+1;save();playSound('success');toast('Фокус-сессия завершена. Время отдохнуть!');focusMode='rest';focusRemaining=5*60}else{toast('Отдых завершён. Готов к следующему циклу?');focusMode='work';focusRemaining=25*60}updateTimer();$('timerStart').textContent='▶ Старт';$('focusCount').textContent=`Завершено фокус-сессий: ${state.focusSessions||0}`}},1000)};$('timerReset').onclick=()=>{stopTimer();focusMode='work';focusRemaining=25*60;updateTimer();$('timerStart').textContent='▶ Старт'}}if(name==='settings'){$('languageSelect').onchange=()=>{state.language=$('languageSelect').value;save();applyLanguage();toast('Язык изменён')};$('soundToggle').onchange=e=>{state.sounds=e.target.checked;save();if(state.sounds)playSound('tap');toast('Настройки звука сохранены')};$('soundVolume').oninput=e=>{state.soundVolume=Number(e.target.value);save()};$('copySupport').onclick=()=>{if(navigator.clipboard?.writeText)navigator.clipboard.writeText('VirilSupport@gmail.com').then(()=>toast('Адрес скопирован')).catch(()=>toast('Почта: VirilSupport@gmail.com'));else toast('Почта: VirilSupport@gmail.com')}}}
 function updateTimer(){let m=Math.floor(focusRemaining/60),s=focusRemaining%60;let face=$('timerFace'),label=$('timerLabel');if(face)face.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;if(label)label.textContent=focusMode==='work'?'Работа · Помодоро':'Отдых'}function stopTimer(){if(focusInterval)clearInterval(focusInterval);focusInterval=null}
 document.querySelectorAll('[data-modal]').forEach(b=>b.onclick=()=>openModal(b.dataset.modal));$('openSettings').onclick=()=>openModal('settings');$('addPlanShortcut').onclick=()=>openModal('plans');$('closeModal').onclick=()=>{backdrop.classList.remove('open');stopTimer();if(recording){recording.stop();recording=null}};backdrop.addEventListener('click',e=>{if(e.target===backdrop){backdrop.classList.remove('open');stopTimer();if(recording){recording.stop();recording=null}}});$('homeGoals').addEventListener('click',e=>{let b=e.target.closest('[data-toggle]');if(!b)return;let g=state.goals.find(x=>x.id===b.dataset.toggle);if(!g)return;let oldLevel=state.level;if(g.done){g.done=false;state.xp=Math.max(0,state.xp-num(g.xp));if(cloudUserId&&!window.__virilAnonymous)cloud.rpc('set_goal_completion',{p_goal_id:String(g.id),p_xp:Number(g.xp),p_done:false}).then(({error})=>{if(error)console.error('XP reverse RPC:',error)});toast(`−${g.xp} XP`)}else{g.done=true;state.xp+=num(g.xp);markActivity();if(cloudUserId&&!window.__virilAnonymous)cloud.rpc('set_goal_completion',{p_goal_id:String(g.id),p_xp:Number(g.xp),p_done:true}).then(({error})=>{if(error){console.error('XP award RPC:',error);toast('Локально сохранено. Не удалось обновить мировой рейтинг.')}else if(document.querySelector('#screen-league.active'))loadLeaderboard()});toast(`Цель выполнена: +${g.xp} XP`)}normalize();playSound(state.level>oldLevel?'level':g.done?'tap':'success');save();saveCloudNow();render()});$('saveProfile').onclick=()=>{let n=$('nickname').value.trim();if(!n){toast('Введи никнейм');return}state.nickname=n.slice(0,24);save();if(cloudUserId&&!window.__virilAnonymous)cloud.rpc('update_my_profile',{p_nickname:state.nickname,p_avatar:state.avatar}).then(({error})=>{if(error)console.error('Profile sync:',error)});render();$('editWrap').classList.add('hidden');toast('Профиль сохранён')};$('avatarChoices').addEventListener('click',e=>{let b=e.target.closest('[data-avatar]');if(!b)return;state.avatar=b.dataset.avatar;render();save();if(cloudUserId&&!window.__virilAnonymous)cloud.rpc('update_my_profile',{p_nickname:state.nickname,p_avatar:state.avatar}).then(({error})=>{if(error)console.error('Profile sync:',error)})});$('registerGoogle').onclick=async()=>{try{let {data,error}=await cloud.auth.linkIdentity({provider:'google',options:{redirectTo:location.href}});if(error)throw error;if(!data?.url)toast('Открой ссылку Google для завершения регистрации')}catch(e){console.error(e);toast('Не удалось начать Google-регистрацию. Проверь настройки OAuth в Supabase.')}};$('changeAccount').onclick=async()=>{if(!confirm('Сменить аккаунт? Сначала убедись, что текущий прогресс сохранён.'))return;try{await cloud.auth.signOut();window.__virilAnonymous=true;cloudUserId=null;cloudReady=false;let r=await cloud.auth.signInAnonymously();if(r.error)throw r.error;cloudUserId=r.data.user.id;window.__virilAnonymous=true;cloudReady=true;save();render();toast('Создан новый гостевой аккаунт')}catch(e){toast('Не удалось сменить аккаунт')}};$('deleteAccount').onclick=async()=>{if(!confirm('Удалить аккаунт и связанные данные? Это действие нельзя отменить.'))return;try{let {error}=await cloud.functions.invoke('delete-account');if(error)throw error;await cloud.auth.signOut();localStorage.removeItem(KEY);state=defaultState();cloudUserId=null;cloudReady=false;render();toast('Аккаунт удалён')}catch(e){console.error(e);toast('Удаление требует настройки серверной функции delete-account в Supabase.')}};$('resetProgress').onclick=()=>{if(confirm('Сбросить весь прогресс и дневник на этом устройстве? Это действие нельзя отменить.')){let lang=state.language;state=defaultState();state.language=lang;save();render();toast('Прогресс сброшен')}};
-function resizeCanvas(){let c=$('particles'),d=Math.min(devicePixelRatio||1,2);c.width=innerWidth*d;c.height=innerHeight*d;c.style.width=innerWidth+'px';c.style.height=innerHeight+'px';let x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);let ps=Array.from({length:Math.min(32,Math.max(15,Math.floor(innerWidth/28)))},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.2+.3,vx:(Math.random()-.5)*.13,vy:(Math.random()-.5)*.11,a:Math.random()*.28+.06}));function draw(){x.clearRect(0,0,innerWidth,innerHeight);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=innerWidth;if(p.x>innerWidth)p.x=0;if(p.y<0)p.y=innerHeight;if(p.y>innerHeight)p.y=0;x.beginPath();x.arc(p.x,p.y,p.r,0,Math.PI*2);x.fillStyle=`rgba(150,190,255,${p.a})`;x.fill()});if(!document.hidden)requestAnimationFrame(draw)}draw()}window.addEventListener('resize',resizeCanvas);
+function resizeCanvas(){let c=$('particles'),d=Math.min(devicePixelRatio||1,2);c.width=innerWidth*d;c.height=innerHeight*d;c.style.width=innerWidth+'px';c.style.height=innerHeight+'px';let x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);let ps=Array.from({length:Math.min(32,Math.max(15,Math.floor(innerWidth/28)))},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.2+.3,vx:(Math.random()-.5)*.13,vy:(Math.random()-.5)*.11,a:Math.random()*.28+.06}));function draw(){x.clearRect(0,0,innerWidth,innerHeight);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=innerWidth;if(p.x>innerWidth)p.x=0;if(p.y<0)p.y=innerHeight;if(p.y>innerHeight)p.y=0;x.beginPath();x.arc(p.x,p.y,p.r,0,Math.PI*2);x.fillStyle=`rgba(150,190,255,${p.a})`;x.fill()});if(!document.hidden)requestAnimationFrame(draw)}draw()}window.addEventListener('resize',resizeCanvas);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('bookReader').classList.contains('open'))closeBookReader()});
 async function initCloud(){try{let {data:sd,error:se}=await cloud.auth.getSession();if(se)throw se;if(!sd.session){let r=await cloud.auth.signInAnonymously();if(r.error)throw r.error;sd={session:r.data.session}}window.__virilAnonymous=!!sd.session.user.is_anonymous;cloudUserId=sd.session.user.id;let {data,error}=await cloud.from('game_saves').select('save_data').eq('user_id',cloudUserId).maybeSingle();if(error)throw error;if(data?.save_data){let local=state;state={...local,...data.save_data};state.diary=state.diary||[];state.history=state.history||{};normalize();checkDay();render()}cloudReady=true;save();}catch(e){console.error('Supabase init error:',e);toast('Облако недоступно — локальное сохранение работает.')}}
 
 /* ===== v2 modules ===== */
@@ -213,30 +281,120 @@ document.querySelectorAll('#rangeSeg button').forEach(b=>b.classList.toggle('on'
 function pick(e){let box=$('chartBox'),m=box._m;if(!m)return;let r=box.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*m.W,i=Math.round((x-m.pl)/((m.W-m.pl-m.pr)/Math.max(1,cR-1)));i=Math.max(0,Math.min(cR-1,i));if(i!==cSel){cSel=i;drawChart(false)}}
 $('chartBox').addEventListener('pointerdown',pick);$('chartBox').addEventListener('pointermove',e=>{if(e.pointerType==='mouse'||e.buttons)pick(e)});
 $('rangeSeg').addEventListener('click',e=>{let b=e.target.closest('[data-r]');if(b){cR=+b.dataset.r;cSel=-1;drawChart(true)}});$('metricSeg').addEventListener('click',e=>{let b=e.target.closest('[data-m]');if(b){cM=b.dataset.m;drawChart(true)}});
-/* Ресурсы: книги из Supabase Storage (bucket: books) */
+/* Ресурсы: библиотека PDF/EPUB из Supabase Storage */
+let booksCache=[],bookCatalog={},activeBook=null,pdfDoc=null,pdfPage=1,pdfScale=1.15,epubBook=null,epubRendition=null,readerObjectUrl=null;
+const BOOK_DB='viril_book_cache_v1',BOOK_STORE='books',BOOK_READER_PREFS='viril_book_reader_prefs_v1';
+const readerDefaults={fontSize:100,theme:'dark',lineHeight:1.6,paragraph:1.5};
+function readReaderPrefs(){try{return {...readerDefaults,...JSON.parse(localStorage.getItem(BOOK_READER_PREFS)||'{}')}}catch(e){return {...readerDefaults}}}
+let readerPrefs=readReaderPrefs();
+function saveReaderPrefs(){try{localStorage.setItem(BOOK_READER_PREFS,JSON.stringify(readerPrefs))}catch(e){}}
+function openBookDB(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window)){reject(new Error('IndexedDB недоступен'));return}let req=indexedDB.open(BOOK_DB,1);req.onupgradeneeded=()=>{let db=req.result;if(!db.objectStoreNames.contains(BOOK_STORE))db.createObjectStore(BOOK_STORE,{keyPath:'name'})};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+async function cachedBook(name){let db=await openBookDB();return new Promise((resolve,reject)=>{let tx=db.transaction(BOOK_STORE,'readonly'),r=tx.objectStore(BOOK_STORE).get(name);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>reject(r.error);tx.oncomplete=()=>db.close()})}
+async function cacheBook(name,blob){let db=await openBookDB();return new Promise((resolve,reject)=>{let tx=db.transaction(BOOK_STORE,'readwrite');tx.objectStore(BOOK_STORE).put({name,blob,savedAt:Date.now()});tx.oncomplete=()=>{db.close();resolve(true)};tx.onerror=()=>{db.close();reject(tx.error)};tx.onabort=()=>{db.close();reject(tx.error||new Error('Не удалось сохранить книгу'))}})}
+function publicBookUrl(name){return cloud.storage.from('books').getPublicUrl(name).data.publicUrl}
+function bookTitle(name){return name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim()}
+function bookMeta(name){return bookCatalog[name]||{}}
+function bookCoverUrl(cover){if(!cover)return '';if(/^https?:\/\//i.test(cover))return cover;return publicBookUrl(String(cover).replace(/^\/+/,''))}
+function renderBookCover(cover,title){return cover?`<img class="book-cover" src="${esc(bookCoverUrl(cover))}" alt="Обложка ${esc(title)}" loading="lazy" onerror="this.style.display='none'">`:'<div class="book-placeholder" aria-hidden="true">📖</div>'}
 async function loadBooks(){
- const list=$('booksList');if(!list)return;
- list.innerHTML='<div class="empty">Загружаем библиотеку…</div>';
+ const list=$('booksList');if(!list)return;list.innerHTML='<div class="empty">Загружаем библиотеку…</div>';
  try{
-  const {data,error}=await cloud.storage.from('books').list('',{limit:100,sortBy:{column:'name',order:'asc'}});
-  if(error)throw error;
-  const files=(data||[]).filter(f=>f.name&&!f.name.startsWith('.')&&f.id);
-  if(!files.length){list.innerHTML='<div class="empty">Пока нет книг. Загрузи PDF или EPUB в корень bucket «books» в Supabase Storage.</div>';return}
-  list.innerHTML=files.map(file=>{
-   const name=String(file.name),ext=(name.split('.').pop()||'').toLowerCase(),title=name.replace(/\\.[^.]+$/,'').replace(/[_-]+/g,' ');
-   const url=cloud.storage.from('books').getPublicUrl(name).data.publicUrl;
-   const format=ext.toUpperCase()||'ФАЙЛ';
-   return `<div class="glass list-card" style="display:flex;align-items:center;gap:12px"><div class="hub-ico" style="width:42px;height:42px;font-size:20px">📖</div><div style="min-width:0;flex:1"><b style="display:block;font-size:13px;overflow-wrap:anywhere">${esc(title)}</b><span class="hint">${esc(format)}</span></div><a class="btn primary" href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;white-space:nowrap">Открыть</a></div>`;
+  const {data,error}=await cloud.storage.from('books').list('',{limit:200,sortBy:{column:'name',order:'asc'}});if(error)throw error;
+  const all=(data||[]).filter(f=>f.name&&!f.name.startsWith('.')&&f.id),bookFiles=all.filter(f=>/\.(pdf|epub)$/i.test(f.name)),covers=new Map();
+  all.filter(f=>/\.(png|jpe?g|webp)$/i.test(f.name)).forEach(f=>covers.set(f.name.replace(/\.(png|jpe?g|webp)$/i,''),f.name));
+  bookCatalog={};const catalogFile=all.find(f=>f.name.toLowerCase()==='catalog.json');
+  if(catalogFile){try{const {data:catalogBlob,error:catalogError}=await cloud.storage.from('books').download(catalogFile.name);if(!catalogError&&catalogBlob){const parsed=JSON.parse(await catalogBlob.text());bookCatalog=parsed.books||parsed||{}}}catch(catalogErr){console.warn('Optional books catalog could not be read:',catalogErr)}}
+  booksCache=bookFiles;
+  if(!bookFiles.length){list.innerHTML='<div class="empty">Пока нет книг. Загрузи файлы PDF или EPUB в корень bucket «books» в Supabase Storage.</div>';return}
+  const cached=await Promise.all(bookFiles.map(f=>cachedBook(f.name).catch(()=>null)));
+  list.innerHTML='<div class="books-intro"><b>Твоя библиотека</b><p>Открывай книги прямо из облака или сохраняй их на устройство, чтобы читать без интернета. Настройки чтения запоминаются автоматически.</p></div>'+bookFiles.map((f,i)=>{
+   let meta=bookMeta(f.name),base=f.name.replace(/\.(pdf|epub)$/i,''),cover=meta.cover||covers.get(base),ext=f.name.split('.').pop().toUpperCase(),title=meta.title||bookTitle(f.name),author=meta.author||'',description=meta.description||meta.desc||'',offline=!!cached[i];
+   let coverHtml=renderBookCover(cover,title);
+   return `<article class="glass book-card"><div>${coverHtml}</div><div class="book-card-main"><div class="book-card-title">${esc(title)}</div>${author?`<span class="book-card-author">${esc(author)}</span>`:''}${description?`<div class="book-card-desc">${esc(description)}</div>`:''}<div class="book-card-meta">${esc(ext)} · ${offline?'Сохранена офлайн':'Доступна онлайн'}</div><div class="book-card-actions"><button class="btn primary" type="button" data-open-book="${esc(f.name)}">Читать</button><button class="btn" type="button" data-cache-book="${esc(f.name)}">${offline?'✓ Офлайн':'↓ Скачать'}</button></div></div></article>`;
   }).join('');
- }catch(e){
-  console.error('Books storage error:',e);
-  list.innerHTML='<div class="empty">Не удалось загрузить книги. Проверь, что в Supabase создан публичный bucket «books» и разрешено чтение списка файлов.</div>';
- }
+ }catch(e){console.error('Books storage error:',e);list.innerHTML='<div class="empty">Не удалось загрузить библиотеку. Проверь доступ на чтение bucket «books» в Supabase Storage.</div>'}
 }
+function applyReaderPrefs(){
+ const stage=$('readerStage');if(stage)stage.dataset.theme=readerPrefs.theme;
+ const size=$('readerFontSize'),label=$('readerSizeLabel'),theme=$('readerTheme'),line=$('readerLine'),para=$('readerParagraph');
+ if(size)size.value=readerPrefs.fontSize;if(label)label.textContent='Текст '+readerPrefs.fontSize+'%';
+ if(theme)theme.value=readerPrefs.theme;if(line)line.value=String(readerPrefs.lineHeight);if(para)para.value=String(readerPrefs.paragraph);
+ if(epubRendition)applyEpubReaderPrefs();
+}
+function applyEpubReaderPrefs(){
+ if(!epubRendition)return;
+ const size=readerPrefs.fontSize+'%',line=String(readerPrefs.lineHeight),para=(readerPrefs.paragraph*0.65)+'em';
+ try{
+  epubRendition.themes.default({'body':{'font-size':size+' !important','line-height':line+' !important','padding':'0 5% !important'},'p':{'margin-bottom':para+' !important','line-height':line+' !important'}});
+  epubRendition.themes.fontSize(size);
+  const theme=readerPrefs.theme;
+  epubRendition.themes.override('color',theme==='dark'?'#e8eaf0':theme==='warm'?'#443522':'#222','!important');
+  epubRendition.themes.override('background',theme==='dark'?'#171c2b':theme==='warm'?'#f0e3c9':'#f4f1e9','!important');
+  epubRendition.themes.override('line-height',line,'!important');
+  epubRendition.themes.override('margin-bottom',para,'!important');
+ }catch(e){console.warn('EPUB reader style could not be applied:',e)}
+}
+function changeReaderPref(key,value){readerPrefs[key]=value;saveReaderPrefs();applyReaderPrefs();if(pdfDoc&&key==='fontSize'){pdfScale=Math.max(.65,Math.min(2.5,1.15*(Number(value)/100)));renderPdfPage()}}
+async function openBook(name){
+ const file=booksCache.find(f=>f.name===name);if(!file)return;closeBookReader();const meta=bookMeta(name);
+ activeBook={name,title:meta.title||bookTitle(name),ext:name.split('.').pop().toLowerCase()};
+ $('readerTitle').textContent=activeBook.title;$('bookReader').classList.add('open');$('bookReader').setAttribute('aria-hidden','false');
+ $('readerLoading').classList.remove('hidden');$('readerLoading').textContent='Открываем книгу…';$('pdfCanvas').classList.add('hidden');$('epubStage').classList.add('hidden');$('readerStatus').textContent='';
+ applyReaderPrefs();
+ try{
+  let saved=await cachedBook(name).catch(()=>null),source;
+  if(saved?.blob){readerObjectUrl=URL.createObjectURL(saved.blob);source=readerObjectUrl;$('readerStatus').textContent='Открыта офлайн-копия · прогресс чтения сохраняется'}
+  else{source=publicBookUrl(name);$('readerStatus').textContent='Чтение из облака · файл не скачивается в офлайн-кэш'}
+  $('readerLoading').classList.add('hidden');
+  if(activeBook.ext==='pdf'){
+   if(!window.pdfjsLib)throw new Error('Не загрузился PDF-просмотрщик');
+   pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+   pdfDoc=await pdfjsLib.getDocument({url:source,rangeChunkSize:65536,disableStream:false,disableAutoFetch:false}).promise;
+   let savedPage=Number((JSON.parse(localStorage.getItem('viril_book_progress')||'{}'))[name])||1;
+   pdfPage=Math.max(1,Math.min(pdfDoc.numPages,savedPage));pdfScale=1.15*(readerPrefs.fontSize/100);await renderPdfPage();
+  }else{
+   if(typeof window.ePub!=='function')throw new Error('Не загрузился EPUB-просмотрщик');
+   $('epubStage').classList.remove('hidden');epubBook=ePub(source);
+   epubRendition=epubBook.renderTo('epubStage',{width:'100%',height:'100%',spread:'none',flow:'paginated'});
+   let loc=JSON.parse(localStorage.getItem('viril_book_progress')||'{}')[name];
+   await epubRendition.display(loc||undefined);applyEpubReaderPrefs();
+   epubRendition.on('relocated',location=>{let all=JSON.parse(localStorage.getItem('viril_book_progress')||'{}');all[name]=location.start.cfi;localStorage.setItem('viril_book_progress',JSON.stringify(all));$('readerPage').textContent='EPUB · чтение';});
+   $('readerPage').textContent='EPUB';
+  }
+ }catch(e){console.error('Book open error:',e);$('readerLoading').classList.remove('hidden');$('readerLoading').textContent='Не удалось открыть книгу. Проверь формат и доступ к файлу в Supabase.';$('readerStatus').textContent=String(e.message||'Ошибка чтения')}
+}
+async function renderPdfPage(){
+ if(!pdfDoc)return;let page=await pdfDoc.getPage(pdfPage),viewport=page.getViewport({scale:pdfScale}),canvas=$('pdfCanvas'),ctx=canvas.getContext('2d'),ratio=Math.min(window.devicePixelRatio||1,2);
+ canvas.width=Math.floor(viewport.width*ratio);canvas.height=Math.floor(viewport.height*ratio);canvas.style.width=viewport.width+'px';canvas.style.height=viewport.height+'px';ctx.setTransform(ratio,0,0,ratio,0,0);
+ await page.render({canvasContext:ctx,viewport}).promise;canvas.classList.remove('hidden');$('readerPage').textContent=`${pdfPage} / ${pdfDoc.numPages}`;$('readerStage').scrollTop=0;$('readerStage').scrollLeft=0;
+ let all=JSON.parse(localStorage.getItem('viril_book_progress')||'{}');all[activeBook.name]=pdfPage;localStorage.setItem('viril_book_progress',JSON.stringify(all));
+}
+async function downloadBook(name){
+ let btn=document.querySelector(`[data-cache-book="${CSS.escape(name)}"]`);if(btn){btn.disabled=true;btn.textContent='Скачиваем…'}
+ try{let existing=await cachedBook(name).catch(()=>null);if(!existing){let response=await fetch(publicBookUrl(name));if(!response.ok)throw new Error('HTTP '+response.status);let blob=await response.blob();await cacheBook(name,blob)}
+  toast('Книга сохранена на устройстве для офлайн-чтения');await loadBooks();
+ }catch(e){console.error('Offline book error:',e);toast('Не удалось скачать книгу. Проверь свободное место и подключение.')}
+ finally{if(btn)btn.disabled=false}
+}
+function closeBookReader(){
+ if(epubRendition){try{epubRendition.destroy()}catch(e){}epubRendition=null}
+ if(epubBook){try{epubBook.destroy()}catch(e){}epubBook=null}
+ pdfDoc=null;activeBook=null;if(readerObjectUrl){URL.revokeObjectURL(readerObjectUrl);readerObjectUrl=null}
+ let overlay=$('bookReader');if(overlay){overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true')}
+}
+$('booksList').addEventListener('click',e=>{let open=e.target.closest('[data-open-book]'),save=e.target.closest('[data-cache-book]');if(open)openBook(open.dataset.openBook);if(save)downloadBook(save.dataset.cacheBook)});
 $('openBooks').onclick=()=>{$('resourcesHub').classList.add('hidden');$('booksView').classList.remove('hidden');loadBooks()};
-$('booksBack').onclick=()=>{$('booksView').classList.add('hidden');$('resourcesHub').classList.remove('hidden')};
-$('booksRefresh').onclick=loadBooks;
-
+$('booksBack').onclick=()=>{$('booksView').classList.add('hidden');$('resourcesHub').classList.remove('hidden')};$('booksRefresh').onclick=loadBooks;
+$('readerClose').onclick=closeBookReader;
+$('readerPrev').onclick=()=>{if(pdfDoc&&pdfPage>1){pdfPage--;renderPdfPage()}else if(epubRendition)epubRendition.prev()};
+$('readerNext').onclick=()=>{if(pdfDoc&&pdfPage<pdfDoc.numPages){pdfPage++;renderPdfPage()}else if(epubRendition)epubRendition.next()};
+$('readerZoomOut').onclick=()=>{if(pdfDoc){pdfScale=Math.max(.65,pdfScale-.15);renderPdfPage()}else if(epubRendition){readerPrefs.fontSize=Math.max(80,readerPrefs.fontSize-5);changeReaderPref('fontSize',readerPrefs.fontSize)}};
+$('readerZoomIn').onclick=()=>{if(pdfDoc){pdfScale=Math.min(2.5,pdfScale+.15);renderPdfPage()}else if(epubRendition){readerPrefs.fontSize=Math.min(150,readerPrefs.fontSize+5);changeReaderPref('fontSize',readerPrefs.fontSize)}};
+$('readerFontSize').oninput=e=>changeReaderPref('fontSize',Number(e.target.value));
+$('readerTheme').onchange=e=>changeReaderPref('theme',e.target.value);
+$('readerLine').onchange=e=>changeReaderPref('lineHeight',Number(e.target.value));
+$('readerParagraph').onchange=e=>changeReaderPref('paragraph',Number(e.target.value));
+$('readerOffline').onclick=()=>{if(activeBook)downloadBook(activeBook.name)};
 /* профиль */
 $('rowEdit').onclick=()=>{
  if(!cloudUserId||window.__virilAnonymous){toast('Сначала войди через Google, чтобы изменить профиль');return}
