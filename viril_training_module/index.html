@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#eaf6ff"><title>Viril Training</title><link rel="stylesheet" href="./training.css"></head>
+<body><main class="app">
+<header><a class="brand" href="#" id="homeBtn">VIRIL <span>TRAINING</span></a><div class="xp">✦ <b id="xp">0</b> XP</div></header>
+<nav><button data-view="home" class="active">Главная</button><button data-view="catalog">Упражнения</button><button data-view="programs">Программы</button><button data-view="session">Тренировка</button></nav>
+<section id="home" class="view active"><div class="hero"><small>РАЗВИТИЕ · ТРЕНИРОВКИ</small><h1>Становись сильнее<br><em>шаг за шагом.</em></h1><p>Выбирай упражнения, занимайся в комфортном темпе и отмечай свой прогресс.</p><button class="primary" data-view="catalog">Выбрать упражнения</button></div><div class="stats"><article><small>ОБЩИЙ ОПЫТ</small><b id="homeXp">0 XP</b></article><article><small>В ПЛАНЕ</small><b id="queueCount">0</b></article><article><small>ПОДХОДОВ</small><b id="setsCount">0</b></article></div><div class="note">Техника важнее количества. Не торопись и прекращай упражнение, если чувствуешь боль или недомогание.</div></section>
+<section id="catalog" class="view"><div class="heading"><small>КАТАЛОГ</small><h1>Упражнения</h1></div><input id="search" placeholder="Найти упражнение…"><div id="filters" class="filters"></div><div id="exerciseList" class="cards">Загружаем каталог…</div></section>
+<section id="programs" class="view"><div class="heading"><small ГОТОВЫЕ ПЛАНЫ</small><h1>Программы</h1></div><div id="programList" class="cards"></div></section>
+<section id="session" class="view"><div class="heading"><small>МОЙ ПЛАН</small><h1>Тренировка</h1></div><div class="timer"><b id="clock">00:00</b><button id="timerBtn">Старт секундомера</button></div><div id="sessionList" class="cards"></div><button id="finish" class="primary wide">Завершить тренировку</button></section>
+<div id="toast" role="status"></div>
+</main><script src="./training.js"></script></body></html>
