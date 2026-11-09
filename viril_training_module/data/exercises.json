@@ -1,0 +1,93 @@
+[
+  {
+    "id": "push-up",
+    "name": "Отжимания",
+    "group": "chest",
+    "difficulty": "Начальная",
+    "description": "Базовое упражнение для верхней части тела."
+  },
+  {
+    "id": "incline-push-up",
+    "name": "Отжимания от опоры",
+    "group": "chest",
+    "difficulty": "Начальная",
+    "description": "Более лёгкий вариант отжиманий."
+  },
+  {
+    "id": "wall-push-up",
+    "name": "Отжимания от стены",
+    "group": "chest",
+    "difficulty": "Начальная",
+    "description": "Спокойный вариант для освоения движения."
+  },
+  {
+    "id": "squat",
+    "name": "Приседания",
+    "group": "legs",
+    "difficulty": "Начальная",
+    "description": "Контролируемое движение с собственным весом."
+  },
+  {
+    "id": "glute-bridge",
+    "name": "Ягодичный мост",
+    "group": "legs",
+    "difficulty": "Начальная",
+    "description": "Упражнение для мышц таза и задней цепи."
+  },
+  {
+    "id": "reverse-lunge",
+    "name": "Обратные выпады",
+    "group": "legs",
+    "difficulty": "Средняя",
+    "description": "Работа ног с контролем равновесия."
+  },
+  {
+    "id": "calf-raise",
+    "name": "Подъёмы на носки",
+    "group": "legs",
+    "difficulty": "Начальная",
+    "description": "Упражнение для икроножных мышц."
+  },
+  {
+    "id": "bird-dog",
+    "name": "Птица-собака",
+    "group": "core",
+    "difficulty": "Начальная",
+    "description": "Упражнение на координацию и устойчивость корпуса."
+  },
+  {
+    "id": "dead-bug",
+    "name": "Мёртвый жук",
+    "group": "core",
+    "difficulty": "Начальная",
+    "description": "Контроль корпуса в положении лёжа."
+  },
+  {
+    "id": "plank",
+    "name": "Планка",
+    "group": "core",
+    "difficulty": "Средняя",
+    "description": "Статическое удержание устойчивого положения."
+  },
+  {
+    "id": "superman",
+    "name": "Супермен",
+    "group": "back",
+    "difficulty": "Средняя",
+    "description": "Мягкое укрепление мышц спины без рывков."
+  },
+  {
+    "id": "wall-slide",
+    "name": "Скольжение по стене",
+    "group": "shoulders",
+    "difficulty": "Начальная",
+    "description": "Контролируемое движение плеч и лопаток."
+  },
+  {
+    "id": "march-in-place",
+    "name": "Марш на месте",
+    "group": "cardio",
+    "difficulty": "Начальная",
+    "description": "Лёгкая разминка в комфортном темпе."
+  }
+]
