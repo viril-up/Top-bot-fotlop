@@ -51,7 +51,7 @@ jobs:
 
       - name: Install Capacitor
         run: |
-          npm install @capacitor/core@7 @capacitor/android@7
+          npm install @capacitor/core@7 @capacitor/android@7 @capacitor/splash-screen@7
           npm install --save-dev @capacitor/cli@7
 
       - name: Configure Capacitor
