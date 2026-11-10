@@ -8,3 +8,35 @@
 .profile-actions .mrow:focus-visible{outline:2px solid var(--blue);outline-offset:-3px}
 .profile-actions .mrow+.mrow:before{left:64px}
 @media(prefers-reduced-motion:reduce){.profile-cover-hero:after{animation:none;display:none}}
+
+/* Profile layout fix: keep all action rows at full height inside the scroll area.
+   Previously flex shrinking compressed the seven buttons into thin empty bars. */
+.profile-scroll>*{flex-shrink:0}
+.profile-actions{display:block;flex:0 0 auto}
+.profile-actions .mrow{display:flex;min-height:62px;flex:0 0 auto}
+.profile-actions .mrow-label{display:block;min-width:0;flex:1}
+.profile-scroll{overflow-y:auto;overscroll-behavior:contain;padding-bottom:14px}
+
+/* Profile cover now carries identity and all three season/stat values. */
+.profile-cover-composite{
+  height:252px;min-height:252px;flex:0 0 252px;margin:0 0 2px;
+  mask-image:none;-webkit-mask-image:none;
+  background-position:center 42%;background-size:cover;
+  border:1px solid rgba(175,190,235,.2);
+  box-shadow:inset 0 0 70px rgba(5,8,18,.25),0 12px 28px rgba(0,0,0,.22)
+}
+.profile-cover-composite .cover-shade{
+  position:absolute;inset:0;z-index:0;
+  background:linear-gradient(180deg,rgba(4,7,17,.05) 0%,rgba(5,8,18,.18) 34%,rgba(5,8,18,.84) 100%)
+}
+.cover-identity{position:absolute;z-index:1;left:17px;right:17px;bottom:91px;display:flex;align-items:center;gap:12px}
+.cover-avatar{width:58px!important;height:58px!important;border-radius:50%!important;border:1.5px solid rgba(190,215,255,.72)!important;background:rgba(28,35,58,.88)!important;box-shadow:0 4px 20px #0007;font-size:24px!important}
+.cover-user{min-width:0;text-shadow:0 2px 9px #000}
+.cover-user .name{font-size:20px;max-width:58vw;color:#fff}
+.cover-user .sub{color:rgba(239,243,255,.82);font-size:11px}
+.cover-stats{position:absolute;z-index:1;left:13px;right:13px;bottom:12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.cover-stat{min-width:0;padding:9px 5px 8px;border:1px solid rgba(218,229,255,.22);border-radius:12px;background:rgba(12,16,30,.58);backdrop-filter:blur(9px);text-align:center}
+.cover-stat b{display:block;font-size:17px;line-height:1.25;color:#fff;font-weight:800}
+.cover-stat span{display:block;margin-top:4px;font-size:8px;letter-spacing:.035em;color:rgba(225,233,255,.76)}
+@media(max-height:690px){.profile-cover-composite{height:224px;min-height:224px;flex-basis:224px}}
+@media(prefers-reduced-motion:reduce){.profile-cover-composite:after{animation:none}}
