@@ -8,6 +8,8 @@ on:
       - main
     paths:
       - index.html
+      - modules/**
+      - resources/**
       - .github/workflows/build-apk.yml
 
 permissions:
@@ -46,13 +48,17 @@ jobs:
           set -e
           mkdir -p www
           cp index.html www/index.html
+          cp -R modules resources www/
+          test -s www/modules/profile/profile.css
+          test -s www/modules/profile/profile.js
+          test -s www/resources/profile-cover.jpg
           cmp index.html www/index.html
           npm init -y
 
       - name: Install Capacitor
         run: |
           npm install @capacitor/core@7 @capacitor/android@7 @capacitor/splash-screen@7
-          npm install --save-dev @capacitor/cli@7
+          npm install --save-dev @capacitor/cli@7 @capacitor/assets@latest
 
       - name: Configure Capacitor
         run: |
@@ -63,6 +69,14 @@ jobs:
             "webDir": "www"
           }
           EOF
+
+      - name: Prepare app icon and launch screen assets
+        run: |
+          set -e
+          mkdir -p assets
+          cp resources/icon.png assets/icon.png
+          cp resources/splash.png assets/splash.png
+          npx capacitor-assets generate --android
 
       - name: Add Android platform
         run: npx cap add android
