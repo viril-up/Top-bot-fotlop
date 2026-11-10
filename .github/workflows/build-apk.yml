@@ -65,10 +65,13 @@ jobs:
           cat > capacitor.config.json <<'EOF'
           {
             "appId": "com.viril.selfdev",
-            "appName": "Viril Self Development",
+            "appName": "Viril",
             "webDir": "www"
           }
           EOF
+
+      - name: Add Android platform
+        run: npx cap add android
 
       - name: Prepare app icon and launch screen assets
         run: |
@@ -77,9 +80,6 @@ jobs:
           cp resources/icon.png assets/icon.png
           cp resources/splash.png assets/splash.png
           npx capacitor-assets generate --android
-
-      - name: Add Android platform
-        run: npx cap add android
 
       - name: Sync latest HTML to Android
         run: |
