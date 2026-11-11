@@ -24,6 +24,7 @@ dependencies:
   cached_network_image: ^3.4.1
   path_provider: ^2.1.4
   file_picker: ^8.1.4
+  url_launcher: ^6.3.2
   pdfx: ^2.11.0
   epub_view: ^3.3.0
 
@@ -39,6 +40,7 @@ flutter:
   assets:
     - assets/data/exercises.json
     - assets/data/programs.json
+    - assets/profile-cover.jpg
 
 flutter_launcher_icons:
   android: true
