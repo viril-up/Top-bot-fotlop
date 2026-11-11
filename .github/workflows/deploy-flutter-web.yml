@@ -59,7 +59,7 @@ jobs:
       - name: Build Flutter Web with local engine resources
         if: steps.check.outputs.ready == 'true'
         working-directory: flutter_app
-        run: flutter build web --release --no-web-resources-cdn --web-content-hash --base-href "/Viril-self-developement/flutter/" --output ../build/web
+        run: flutter build web --release --no-web-resources-cdn --base-href "/Viril-self-developement/flutter/" --output ../build/web
 
       - name: Verify Flutter Web output
         if: steps.check.outputs.ready == 'true'
