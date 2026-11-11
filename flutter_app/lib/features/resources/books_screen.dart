@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_epub/flutter_epub.dart';
+import 'package:flutter_epub/flutter_epub.dart' hide DefaultBuilderOptions;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdfx/pdfx.dart';
@@ -375,7 +375,7 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
     super.initState();
     if (widget.isEpub) {
       _epubController = EpubController(
-        document: EpubDocument.openFile(widget.path),
+        document: EpubDocument.openFile(File(widget.path)),
       );
     } else {
       _pdfController = PdfControllerPinch(
