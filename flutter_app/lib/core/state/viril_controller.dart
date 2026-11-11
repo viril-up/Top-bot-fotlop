@@ -17,9 +17,9 @@ class VirilController extends ChangeNotifier {
   bool get isRegistered => repository.isRegistered;
   bool get isAnonymous => repository.isAnonymous;
 
-  Future<void> initialize() async {
+  Future<void> initialize({Map<String, String> legacyStorage = const {}}) async {
     try {
-      state = await repository.initialize();
+      state = await repository.initialize(legacyStorage: legacyStorage);
       final penalty = state.rollover();
       if (penalty > 0) await repository.saveNow(state);
       cloudAvailable = repository.cloudReady;
