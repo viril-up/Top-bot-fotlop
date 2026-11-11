@@ -123,13 +123,15 @@ class VirilState {
     final earned = completed.fold<int>(0, (sum, goal) => sum + _int(goal['xp']));
     final workout = workouts[lastDate];
     final workoutEarned = workout is Map ? _int(workout['xp']) : 0;
-    history[lastDate] = {
+    final historySnapshot = history;
+    historySnapshot[lastDate] = {
       'date': lastDate,
       'goals': oldGoals.map((g) => Map<String, dynamic>.from(g)).toList(),
       'done': completed.length, 'total': oldGoals.length, 'earned': earned,
       'penalty': penalty, 'score': (earned + workoutEarned).clamp(0, 100),
       'net': earned - penalty,
     };
+    data['history'] = historySnapshot;
     data['xp'] = max(0, xp - penalty);
     data['penaltyTotal'] = _int(data['penaltyTotal']) + penalty;
     data['goals'] = <dynamic>[];
@@ -219,8 +221,6 @@ class VirilState {
   }
   static int _int(dynamic value, {int fallback = 0}) =>
       value is num ? value.toInt() : int.tryParse('${value ?? ''}') ?? fallback;
-  static String _dateKey(DateTime date) =>
-      '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 }
 
 String _dateKey(DateTime date) =>
