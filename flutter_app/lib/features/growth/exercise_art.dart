@@ -139,7 +139,7 @@ class _ExerciseArtPainter extends CustomPainter {
       found = found == null ? rect : found.expandToInclude(rect);
     }
     final bounds = found ?? const Rect.fromLTWH(0, 0, 432, 432);
-    final pad = max(bounds.width, bounds.height) * .07;
+    final pad = (max(bounds.width, bounds.height) * .07).toDouble();
     _viewBox = bounds.inflate(pad);
   }
 
@@ -150,7 +150,7 @@ class _ExerciseArtPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (frames.isEmpty || size.isEmpty) return;
-    final scale = min(size.width / _viewBox.width, size.height / _viewBox.height);
+    final scale = min(size.width / _viewBox.width, size.height / _viewBox.height).toDouble();
     final dx = (size.width - _viewBox.width * scale) / 2 - _viewBox.left * scale;
     final dy = (size.height - _viewBox.height * scale) / 2 - _viewBox.top * scale;
 
