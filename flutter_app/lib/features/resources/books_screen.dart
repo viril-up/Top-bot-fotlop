@@ -49,14 +49,6 @@ class _BooksScreenState extends State<BooksScreen> {
       assetPath: 'assets/books/148322-samyiy-bogatyiy-chelovek-v-vavilone.fb2',
     ),
     _BookItem(
-      name: '30393-hitryiy-kak-lis-lovkiy-kak-tigr-36-kitayskih-stratagem-kotoryie-naucha.fb2',
-      title: '36 китайских стратагем',
-      author: 'Китайская классическая традиция',
-      description: 'Исторический сборник о стратегиях и дипломатии.',
-      coverUrl: null, localPath: null, isAsset: true,
-      assetPath: 'assets/books/30393-hitryiy-kak-lis-lovkiy-kak-tigr-36-kitayskih-stratagem-kotoryie-naucha.fb2',
-    ),
-    _BookItem(
       name: '810-chernyiy-lebed-pod-znakom-nepredskazuemosti-sbornik.fb2',
       title: 'Чёрный лебедь',
       author: 'Нассим Николас Талеб',
