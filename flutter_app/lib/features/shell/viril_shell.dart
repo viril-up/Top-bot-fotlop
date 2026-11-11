@@ -37,7 +37,7 @@ class _VirilShellState extends State<VirilShell> {
       GrowthScreen(controller: widget.controller),
       ProgressScreen(controller: widget.controller),
       LeagueScreen(controller: widget.controller),
-      ProfileScreen(controller: widget.controller),
+      ProfileScreen(controller: widget.controller, onNavigate: (value) => setState(() => index = value)),
     ];
 
     return Scaffold(
