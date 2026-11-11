@@ -7,6 +7,7 @@ import '../placeholders/section_screen.dart';
 import '../profile/profile_screen.dart';
 import '../progress/progress_screen.dart';
 import '../league/league_screen.dart';
+import '../resources/books_screen.dart';
 
 class VirilShell extends StatefulWidget {
   const VirilShell({super.key, required this.controller});
@@ -32,7 +33,7 @@ class _VirilShellState extends State<VirilShell> {
   Widget build(BuildContext context) {
     final pages = <Widget>[
       HomeScreen(controller: widget.controller, onNavigate: (value) => setState(() => index = value)),
-      const SectionScreen(title: 'Ресурсы', subtitle: 'Книги и материалы из Supabase Storage'),
+      BooksScreen(controller: widget.controller),
       GrowthScreen(controller: widget.controller),
       ProgressScreen(controller: widget.controller),
       LeagueScreen(controller: widget.controller),
