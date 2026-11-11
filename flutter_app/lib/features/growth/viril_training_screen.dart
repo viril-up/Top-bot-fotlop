@@ -336,30 +336,135 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTi
   }
 
   Future<void> _addProgram(Map<String, dynamic> program) async {
-    final ids = (program['ids'] as List? ?? const []).map((e) => e.toString());
+    final days = (program['days'] as List? ?? const [])
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+    if (days.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('В этой программе пока нет тренировочных дней')),
+      );
+      return;
+    }
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: VirilTheme.panel,
+      builder: (sheetContext) => SafeArea(
+        child: DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: .72,
+          maxChildSize: .92,
+          builder: (context, scrollController) => ListView(
+            controller: scrollController,
+            padding: const EdgeInsets.all(16),
+            children: [
+              Text(
+                (program['name'] ?? 'Программа').toString(),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Выбери тренировочный день. Упражнения можно добавить в свой план.',
+                style: TextStyle(color: Colors.white60, fontSize: 12),
+              ),
+              const SizedBox(height: 12),
+              for (final day in days)
+                Card(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  child: Padding(
+                    padding: const EdgeInsets.all(13),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          (day['name'] ?? 'Тренировочный день').toString() +
+                          ((day['weekday'] as num?) == null
+                            ? ''
+                            : ' · ' + _weekday((day['weekday'] as num).toInt())),
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 8),
+                        for (final exercise in (day['exercises'] as List? ?? const []).whereType<Map>())
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 3),
+                            child: Row(children: [
+                              Expanded(child: Text(
+                                (exercise['name'] ?? '').toString(),
+                                style: const TextStyle(color: Colors.white70, fontSize: 11),
+                              )),
+                              Text(
+                                (exercise['sets'] ?? 3).toString() + ' подх.',
+                                style: const TextStyle(color: Colors.white54, fontSize: 10),
+                              ),
+                            ]),
+                          ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton(
+                            onPressed: () => _addProgramDay(
+                              Map<String, dynamic>.from(day), sheetContext,
+                            ),
+                            child: const Text('Добавить этот день'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _weekday(int value) => const [
+    '', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс',
+  ][value.clamp(0, 7)];
+
+  Future<void> _addProgramDay(
+    Map<String, dynamic> day,
+    BuildContext sheetContext,
+  ) async {
+    final queue = _queue;
     var added = 0;
-    for (final id in ids) {
-      final exercise = _findProgramExercise(id);
-      if (exercise == null) continue;
-      final queue = _queue;
+    var missing = 0;
+    final entries = (day['exercises'] as List? ?? const []).whereType<Map>();
+    for (final entry in entries) {
+      final name = (entry['name'] ?? '').toString();
+      final exercise = _findProgramExercise(name);
+      if (exercise == null) {
+        missing++;
+        continue;
+      }
       if (queue.any((item) => item['exerciseId'] == exercise.id)) continue;
+      final sets = max(1, (entry['sets'] as num?)?.toInt() ?? 3).toInt();
       queue.add({
-        'exerciseId': exercise.id, 'name': exercise.name,
-        'difficulty': exercise.difficulty, 'art': exercise.art,
-        'primary': exercise.primary, 'sets': 3, 'reps': 10,
-        'done': <int>[], 'static': _isStatic(exercise),
+        'exerciseId': exercise.id,
+        'name': exercise.name,
+        'difficulty': exercise.difficulty,
+        'art': exercise.art,
+        'primary': exercise.primary,
+        'sets': sets,
+        'reps': 10,
+        'done': <int>[],
+        'static': _isStatic(exercise),
       });
-      _training['queue'] = queue;
       added++;
     }
-    if (added > 0) {
+    _training['queue'] = queue;
+    if (queue.isNotEmpty) {
       _training['sessionStarted'] ??= DateTime.now().toIso8601String();
-      await _save();
-      if (mounted) DefaultTabController.of(context).animateTo(1);
-    } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Упражнения этой программы не найдены в каталоге')),
-      );
+    }
+    await _save();
+    if (sheetContext.mounted) Navigator.pop(sheetContext);
+    if (mounted) {
+      _tabs.animateTo(1);
+      final message = 'Добавлено упражнений: ' + added.toString() +
+          (missing > 0 ? '. Не найдено в каталоге: ' + missing.toString() : '');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
     }
   }
 
@@ -662,7 +767,10 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTi
             leading: const Icon(Icons.calendar_month_rounded, color: VirilTheme.blue),
             title: Text((program['name'] ?? 'Программа').toString(),
               style: const TextStyle(fontWeight: FontWeight.w700)),
-            subtitle: Text((program['description'] ?? '').toString(),
+            subtitle: Text(
+              (program['days'] as List? ?? const []).length.toString() + ' тренировочных дней · ' +
+              (program['days'] as List? ?? const []).fold<int>(0, (sum, day) =>
+                sum + ((day is Map ? day['exercises'] as List? : null) ?? const []).length).toString() + ' упражнений',
               style: const TextStyle(color: Colors.white54, fontSize: 11)),
             trailing: const Icon(Icons.add_circle_outline, color: VirilTheme.blue),
             onTap: () => _addProgram(program),
