@@ -857,9 +857,9 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTi
                   child: Row(children: [
                     const Icon(Icons.animation_rounded, color: VirilTheme.blue, size: 25),
                     const SizedBox(width: 10),
-                    const Expanded(child: Text(
+                    Expanded(child: Text(
                       'Подключено $_artImportedCount из $_requiredArtCount векторных анимаций. Импортируй архив Viril Training, чтобы открыть иллюстрации движений упражнений.',
-                      style: TextStyle(color: Colors.white70, fontSize: 11, height: 1.35),
+                      style: const TextStyle(color: Colors.white70, fontSize: 11, height: 1.35),
                     )),
                     TextButton(onPressed: _importAnimations, child: const Text('Импорт')),
                   ]),
