@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:epub_view/epub_view.dart' hide DefaultBuilderOptions;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -142,12 +143,37 @@ class _BooksScreenState extends State<BooksScreen> {
       setState(() { _books = books; _loading = false; });
     } catch (error) {
       if (!mounted) return;
+      List<_BookItem> cached = [];
+      try {
+        cached = await _cachedBooks();
+      } catch (_) {}
+      if (!mounted) return;
       setState(() {
-        _books = List<_BookItem>.from(_bundledBooks);
+        _books = [..._bundledBooks, ...cached];
         _error = error.toString();
         _loading = false;
       });
     }
+  }
+
+  Future<List<_BookItem>> _cachedBooks() async {
+    final directory = await _offlineDirectory();
+    final entries = await directory.list().where((entry) => entry is File).toList();
+    final result = <_BookItem>[];
+    for (final entry in entries.whereType<File>()) {
+      final name = entry.uri.pathSegments.isEmpty ? '' : entry.uri.pathSegments.last;
+      final lower = name.toLowerCase();
+      if (!lower.endsWith('.pdf') && !lower.endsWith('.epub')) continue;
+      result.add(_BookItem(
+        name: name,
+        title: _titleFromName(name),
+        author: '',
+        description: 'Сохранено на устройстве · доступно офлайн',
+        coverUrl: null,
+        localPath: entry.path,
+      ));
+    }
+    return result;
   }
 
   String _titleFromName(String name) => name
@@ -535,6 +561,17 @@ class _Fb2ReaderScreenState extends State<Fb2ReaderScreen> {
   void initState() {
     super.initState();
     _content = _loadContent();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _fontSize = prefs.getDouble('viril_reader_font_size') ?? 17;
+      _lineHeight = prefs.getDouble('viril_reader_line_height') ?? 1.65;
+      _theme = prefs.getString('viril_reader_theme') ?? 'dark';
+    });
   }
 
   Future<List<_Fb2Block>> _loadContent() async {
@@ -640,6 +677,10 @@ class _Fb2ReaderScreenState extends State<Fb2ReaderScreen> {
         ),
       ),
     );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('viril_reader_font_size', _fontSize);
+    await prefs.setDouble('viril_reader_line_height', _lineHeight);
+    await prefs.setString('viril_reader_theme', _theme);
     if (mounted) setState(() {});
   }
 
