@@ -422,7 +422,7 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTi
 
   String _weekday(int value) => const [
     '', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс',
-  ][value.clamp(0, 7)];
+  ][value.clamp(0, 7).toInt()];
 
   Future<void> _addProgramDay(
     Map<String, dynamic> day,
