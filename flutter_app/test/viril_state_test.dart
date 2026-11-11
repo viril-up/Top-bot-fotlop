@@ -15,7 +15,7 @@ void main() {
       }));
 
       expect(state.xp, 680);
-      expect(state.level, 4);
+      expect(state.level, 13);
       expect(state.data['futureGoals'], isNotEmpty);
       expect(state.data['soundVolume'], 0.25);
       expect(state.data['customLegacyField']['enabled'], isTrue);
