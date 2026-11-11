@@ -40,11 +40,34 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
 
-          gradle = Path("android/app/build.gradle.kts")
+          import re
+
+          gradle_candidates = [
+              Path("android/app/build.gradle.kts"),
+              Path("android/app/build.gradle"),
+          ]
+          gradle = next((path for path in gradle_candidates if path.exists()), None)
+          if gradle is None:
+              raise SystemExit("Android app Gradle file was not generated")
+
           source = gradle.read_text()
           source = source.replace('com.example.viril', 'com.viril.selfdev')
-          source = source.replace("compileSdk = flutter.compileSdkVersion", "compileSdk = 36")
+          if gradle.suffix == ".kts":
+              source, count = re.subn(
+                  r"compileSdk\\s*=\\s*(?:flutter\\.compileSdkVersion|[0-9]+)",
+                  "compileSdk = 36",
+                  source,
+              )
+          else:
+              source, count = re.subn(
+                  r"compileSdkVersion\\s*=??\\s*(?:flutter\\.compileSdkVersion|[0-9]+)",
+                  "compileSdkVersion 36",
+                  source,
+              )
+          if count == 0:
+              raise SystemExit("Could not set Android compileSdk to 36")
           gradle.write_text(source)
+          print(f"Configured {gradle} to compile against Android SDK 36")
 
           old_main = Path("android/app/src/main/kotlin/com/example/viril/MainActivity.kt")
           new_dir = Path("android/app/src/main/kotlin/com/viril/selfdev")
