@@ -53,17 +53,15 @@ jobs:
           source = gradle.read_text()
           source = source.replace('com.example.viril', 'com.viril.selfdev')
           if gradle.suffix == ".kts":
-              source, count = re.subn(
-                  r"compileSdk\\s*=\\s*(?:flutter\\.compileSdkVersion|[0-9]+)",
-                  "compileSdk = 36",
-                  source,
-              )
+              count = source.count("compileSdk = flutter.compileSdkVersion")
+              source = source.replace("compileSdk = flutter.compileSdkVersion", "compileSdk = 36")
+              if "compileSdk = 36" in source:
+                  count = max(count, 1)
           else:
-              source, count = re.subn(
-                  r"compileSdkVersion\\s*=??\\s*(?:flutter\\.compileSdkVersion|[0-9]+)",
-                  "compileSdkVersion 36",
-                  source,
-              )
+              count = source.count("compileSdkVersion flutter.compileSdkVersion")
+              source = source.replace("compileSdkVersion flutter.compileSdkVersion", "compileSdkVersion 36")
+              if "compileSdkVersion 36" in source:
+                  count = max(count, 1)
           if count == 0:
               raise SystemExit("Could not set Android compileSdk to 36")
           gradle.write_text(source)
