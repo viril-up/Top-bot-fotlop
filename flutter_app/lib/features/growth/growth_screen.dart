@@ -133,14 +133,14 @@ class _GrowthScreenState extends State<GrowthScreen> {
               ]),
               if (goals.isEmpty)
                 Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(18),
+                  child: const Padding(
+                    padding: EdgeInsets.all(18),
                     child: Column(children: [
-                      const Icon(Icons.flag_outlined, color: VirilTheme.blue, size: 26),
-                      const SizedBox(height: 8),
-                      const Text('Долгосрочные планы', style: TextStyle(fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 4),
-                      const Text('Создай цель на неделю, месяц или год.',
+                      Icon(Icons.flag_outlined, color: VirilTheme.blue, size: 26),
+                      SizedBox(height: 8),
+                      Text('Долгосрочные планы', style: TextStyle(fontWeight: FontWeight.w700)),
+                      SizedBox(height: 4),
+                      Text('Создай цель на неделю, месяц или год.',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.white54, fontSize: 11)),
                     ]),
