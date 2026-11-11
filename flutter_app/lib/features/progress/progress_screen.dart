@@ -58,7 +58,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(value, style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w850)),
+          Text(value, style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w800)),
           const SizedBox(height: 4),
           Text(label, style: const TextStyle(color: Colors.white60, fontSize: 10)),
         ]),
