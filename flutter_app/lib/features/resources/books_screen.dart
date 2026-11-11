@@ -587,7 +587,8 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
     String textOf(String path) => utf8.decode(bytesOf(path), allowMalformed: true);
 
     final container = xml.XmlDocument.parse(textOf('META-INF/container.xml'));
-    final rootfile = container.findAllElements('rootfile').firstOrNull;
+    final rootfiles = container.findAllElements('rootfile').toList();
+    final rootfile = rootfiles.isEmpty ? null : rootfiles.first;
     final packagePath = rootfile?.getAttribute('full-path');
     if (packagePath == null || packagePath.isEmpty) {
       throw const FormatException('В EPUB не найден package.opf');
@@ -604,7 +605,8 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
     }
 
     final blocks = <_ReaderBlock>[];
-    final spine = packageDoc.findAllElements('spine').firstOrNull;
+    final spines = packageDoc.findAllElements('spine').toList();
+    final spine = spines.isEmpty ? null : spines.first;
     if (spine == null) throw const FormatException('В EPUB отсутствует порядок глав');
 
     for (final itemRef in spine.findAllElements('itemref')) {
