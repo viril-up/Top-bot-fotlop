@@ -116,7 +116,7 @@ class VirilState {
     var penalty = 0;
     for (final goal in oldGoals) {
       if (goal['done'] != true && goal['penaltyApplied'] != true) {
-        penalty += _int(goal['penalty'], fallback: 5).clamp(5, 10);
+        penalty += _int(goal['penalty'], fallback: 5).clamp(5, 10).toInt();
         goal['penaltyApplied'] = true;
       }
     }
