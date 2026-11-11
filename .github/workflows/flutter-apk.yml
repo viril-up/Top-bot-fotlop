@@ -191,10 +191,10 @@ jobs:
           output="$(flutter analyze 2>&1)"
           status=$?
           printf '%s\n' "$output"
-          if printf '%s\n' "$output" | grep -E ' • (error|warning) •'; then
+          if printf '%s\n' "$output" | grep -E '(^|[[:space:]])(error|warning) •'; then
             exit 1
           fi
-          if [ "$status" -ne 0 ] && ! printf '%s\n' "$output" | grep -q ' • info •'; then
+          if [ "$status" -ne 0 ] && ! printf '%s\n' "$output" | grep -q 'info •'; then
             exit "$status"
           fi
           exit 0
