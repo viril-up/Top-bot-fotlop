@@ -19,14 +19,19 @@ class ArtArchiveImporter {
     var imported = 0;
     for (final entry in archive.files) {
       final normalized = entry.name.replaceAll('\\', '/');
+      final parts = normalized.split('/');
+      final artIndex = parts.lastIndexOf('art');
       if (!entry.isFile ||
-          !normalized.startsWith('art/') ||
           !normalized.endsWith('.txt') ||
-          normalized.contains('../')) {
+          artIndex < 0 ||
+          artIndex != parts.length - 2 ||
+          parts.any((part) => part == '..' || part == '.' || part.isEmpty)) {
         continue;
       }
-      final name = normalized.substring(4);
-      if (name.isEmpty || name.contains('/')) continue;
+      // Supports "art/<slug>.txt", "assets/art/<slug>.txt", and
+      // "viril_training_module/art/<slug>.txt" archive layouts.
+      final name = parts.last;
+      if (name.length <= 4 || name.contains('/')) continue;
       final output = File('${artDirectory.path}/$name');
       final content = entry.content;
       if (content is List<int>) {
