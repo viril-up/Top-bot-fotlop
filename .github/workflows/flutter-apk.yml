@@ -32,6 +32,8 @@ jobs:
         run: flutter pub get
       - name: Analyze
         run: flutter analyze
+      - name: Test legacy state compatibility
+        run: flutter test
       - name: Build APK
         run: flutter build apk --release
       - name: Upload APK
