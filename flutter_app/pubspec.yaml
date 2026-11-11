@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
   supabase_flutter: ^2.8.0
   shared_preferences: ^2.3.2
+  webview_flutter: ^4.10.0
   flutter_secure_storage: ^9.2.2
   go_router: ^14.6.2
   flutter_riverpod: ^2.6.1
@@ -25,3 +26,9 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 flutter:
   uses-material-design: true
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/data/exercises.json
+    - assets/data/programs.json
