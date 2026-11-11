@@ -1,0 +1,88 @@
+name: Deploy Viril Web (legacy + Flutter)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "flutter_app/**"
+      - ".github/workflows/deploy-flutter-web.yml"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "github-pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Flutter entry point
+        id: check
+        shell: bash
+        run: |
+          if [ -f flutter_app/lib/main.dart ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Flutter Web deployment is waiting for flutter_app/lib/main.dart. The legacy HTML/JS site is left untouched."
+          fi
+
+      - name: Set up Flutter
+        if: steps.check.outputs.ready == 'true'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Get Flutter dependencies
+        if: steps.check.outputs.ready == 'true'
+        working-directory: flutter_app
+        run: flutter pub get
+
+      - name: Build Flutter Web
+        if: steps.check.outputs.ready == 'true'
+        working-directory: flutter_app
+        run: flutter build web --release --base-href "/Viril-self-developement/flutter/" --output ../build/web
+
+      - name: Assemble website without replacing the legacy app
+        if: steps.check.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -e
+          mkdir -p dist
+          cp index.html dist/index.html
+          for item in modules resources books viril_training_module; do
+            if [ -e "$item" ]; then
+              cp -R "$item" dist/
+            fi
+          done
+          mkdir -p dist/flutter
+          cp -R build/web/. dist/flutter/
+          touch dist/.nojekyll
+
+      - name: Configure GitHub Pages
+        if: steps.check.outputs.ready == 'true'
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        if: steps.check.outputs.ready == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        if: steps.check.outputs.ready == 'true'
+        id: deployment
+        uses: actions/deploy-pages@v4
