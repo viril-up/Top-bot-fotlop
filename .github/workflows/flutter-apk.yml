@@ -186,7 +186,18 @@ jobs:
           )
           PY
       - name: Analyze
-        run: flutter analyze --no-fatal-infos
+        run: |
+          set +e
+          output="$(flutter analyze 2>&1)"
+          status=$?
+          printf '%s\n' "$output"
+          if printf '%s\n' "$output" | grep -E ' • (error|warning) •'; then
+            exit 1
+          fi
+          if [ "$status" -ne 0 ] && ! printf '%s\n' "$output" | grep -q ' • info •'; then
+            exit "$status"
+          fi
+          exit 0
       - name: Test legacy state compatibility
         run: flutter test
       - name: Build APK
