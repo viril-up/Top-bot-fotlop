@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
+import 'package:xml/xml.dart' as xml;
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_epub/flutter_epub.dart' hide DefaultBuilderOptions;
 import 'package:flutter/material.dart';
@@ -28,6 +31,49 @@ class _BooksScreenState extends State<BooksScreen> {
 
   String get _bucket => 'books';
 
+  static const List<_BookItem> _bundledBooks = [
+    _BookItem(
+      name: '118-dumay-medlenno-reshay-byistro.fb2',
+      title: 'Думай медленно… решай быстро',
+      author: 'Даниэль Канеман',
+      description: 'Книга о мышлении, решениях и когнитивных ошибках.',
+      coverUrl: null, localPath: null, isAsset: true,
+      assetPath: 'assets/books/118-dumay-medlenno-reshay-byistro.fb2',
+    ),
+    _BookItem(
+      name: '148322-samyiy-bogatyiy-chelovek-v-vavilone.fb2',
+      title: 'Самый богатый человек в Вавилоне',
+      author: 'Джордж Клейсон',
+      description: 'Притчи о финансовой грамотности и привычках.',
+      coverUrl: null, localPath: null, isAsset: true,
+      assetPath: 'assets/books/148322-samyiy-bogatyiy-chelovek-v-vavilone.fb2',
+    ),
+    _BookItem(
+      name: '30393-hitryiy-kak-lis-lovkiy-kak-tigr-36-kitayskih-stratagem-kotoryie-naucha.fb2',
+      title: '36 китайских стратагем',
+      author: 'Китайская классическая традиция',
+      description: 'Исторический сборник о стратегиях и дипломатии.',
+      coverUrl: null, localPath: null, isAsset: true,
+      assetPath: 'assets/books/30393-hitryiy-kak-lis-lovkiy-kak-tigr-36-kitayskih-stratagem-kotoryie-naucha.fb2',
+    ),
+    _BookItem(
+      name: '810-chernyiy-lebed-pod-znakom-nepredskazuemosti-sbornik.fb2',
+      title: 'Чёрный лебедь',
+      author: 'Нассим Николас Талеб',
+      description: 'О редких событиях и неопределённости.',
+      coverUrl: null, localPath: null, isAsset: true,
+      assetPath: 'assets/books/810-chernyiy-lebed-pod-znakom-nepredskazuemosti-sbornik.fb2',
+    ),
+    _BookItem(
+      name: '8365-stoitsizm-na-kazhdyiy-den-366-razmyishleniy-o-mudrosti-vole-i-iskusst.fb2',
+      title: 'Стоицизм на каждый день',
+      author: 'Райан Холидей и Стивен Хансельман',
+      description: '366 размышлений о мудрости и самообладании.',
+      coverUrl: null, localPath: null, isAsset: true,
+      assetPath: 'assets/books/8365-stoitsizm-na-kazhdyiy-den-366-razmyishleniy-o-mudrosti-vole-i-iskusst.fb2',
+    ),
+  ];
+
   Future<Directory> _offlineDirectory() async {
     final root = await getApplicationDocumentsDirectory();
     final directory = Directory(root.path + '/viril_books');
@@ -38,6 +84,7 @@ class _BooksScreenState extends State<BooksScreen> {
   Future<void> _load() async {
     setState(() { _loading = true; _error = null; });
     try {
+      final books = List<_BookItem>.from(_bundledBooks);
       final storage = widget.controller.repository.client.storage.from(_bucket);
       final files = await storage.list();
       final visible = files.where((file) {
@@ -61,7 +108,6 @@ class _BooksScreenState extends State<BooksScreen> {
       } catch (_) {}
 
       final directory = await _offlineDirectory();
-      final books = <_BookItem>[];
       for (final file in visible) {
         final name = file.name;
         final base = name.replaceFirst(RegExp(r'\.(pdf|epub)$', caseSensitive: false), '');
@@ -96,7 +142,11 @@ class _BooksScreenState extends State<BooksScreen> {
       setState(() { _books = books; _loading = false; });
     } catch (error) {
       if (!mounted) return;
-      setState(() { _error = error.toString(); _loading = false; });
+      setState(() {
+        _books = List<_BookItem>.from(_bundledBooks);
+        _error = error.toString();
+        _loading = false;
+      });
     }
   }
 
@@ -118,6 +168,7 @@ class _BooksScreenState extends State<BooksScreen> {
   }
 
   Future<void> _saveOffline(_BookItem book) async {
+    if (book.isAsset) return;
     try {
       setState(() => _opening = book.name);
       final path = await _download(book, keepOffline: true);
@@ -138,6 +189,14 @@ class _BooksScreenState extends State<BooksScreen> {
   Future<void> _open(_BookItem book) async {
     try {
       setState(() => _opening = book.name);
+      if (book.isAsset) {
+        if (!mounted) return;
+        setState(() => _opening = null);
+        await Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => Fb2ReaderScreen(title: book.title, assetPath: book.assetPath!),
+        ));
+        return;
+      }
       final path = book.localPath ?? await _download(book, keepOffline: false);
       if (!mounted) return;
       setState(() => _opening = null);
@@ -185,7 +244,7 @@ class _BooksScreenState extends State<BooksScreen> {
       ),
       body: _loading
         ? const Center(child: CircularProgressIndicator())
-        : _error != null
+        : _error != null && _books.isEmpty
           ? _errorView()
           : _books.isEmpty
             ? _emptyView()
@@ -200,7 +259,13 @@ class _BooksScreenState extends State<BooksScreen> {
                     ),
                   ),
                 ),
-                const Padding(
+                if (_error != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Text('Облачная библиотека сейчас недоступна. Встроенные книги остаются доступны офлайн.',
+                    style: const TextStyle(color: Colors.white54, fontSize: 10)),
+                ),
+              const Padding(
                   padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
                   child: Align(
                     alignment: Alignment.centerLeft,
@@ -265,7 +330,7 @@ class _BooksScreenState extends State<BooksScreen> {
                               ],
                               const SizedBox(height: 8),
                               Text(
-                                book.name.toLowerCase().endsWith('.pdf') ? 'PDF' : 'EPUB',
+                                book.isAsset ? 'FB2 · ВСТРОЕНА' : (book.name.toLowerCase().endsWith('.pdf') ? 'PDF' : 'EPUB'),
                                 style: const TextStyle(color: Colors.white38, fontSize: 9),
                               ),
                               const SizedBox(height: 7),
@@ -275,11 +340,11 @@ class _BooksScreenState extends State<BooksScreen> {
                                   child: Text(busy ? 'Загрузка…' : 'Читать'),
                                 ),
                                 OutlinedButton.icon(
-                                  onPressed: busy || book.localPath != null
+                                  onPressed: busy || book.isAsset || book.localPath != null
                                     ? null : () => _saveOffline(book),
                                   icon: Icon(book.localPath != null
                                     ? Icons.check_circle : Icons.download_rounded, size: 16),
-                                  label: Text(book.localPath != null ? 'Офлайн' : 'Скачать'),
+                                  label: Text(book.isAsset ? 'В памяти' : (book.localPath != null ? 'Офлайн' : 'Скачать')),
                                 ),
                               ]),
                             ],
@@ -332,6 +397,8 @@ class _BookItem {
     required this.description,
     required this.coverUrl,
     required this.localPath,
+    this.isAsset = false,
+    this.assetPath,
   });
 
   final String name;
@@ -340,10 +407,13 @@ class _BookItem {
   final String description;
   final String? coverUrl;
   final String? localPath;
+  final bool isAsset;
+  final String? assetPath;
 
   _BookItem copyWith({String? localPath}) => _BookItem(
     name: name, title: title, author: author, description: description,
     coverUrl: coverUrl, localPath: localPath ?? this.localPath,
+    isAsset: isAsset, assetPath: assetPath,
   );
 }
 
@@ -436,4 +506,221 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
             ),
           ),
   );
+}
+
+
+class Fb2ReaderScreen extends StatefulWidget {
+  const Fb2ReaderScreen({
+    super.key,
+    required this.title,
+    required this.assetPath,
+  });
+
+  final String title;
+  final String assetPath;
+
+  @override
+  State<Fb2ReaderScreen> createState() => _Fb2ReaderScreenState();
+}
+
+class _Fb2ReaderScreenState extends State<Fb2ReaderScreen> {
+  late Future<List<_Fb2Block>> _content;
+  final _search = TextEditingController();
+  final _scroll = ScrollController();
+  double _fontSize = 17;
+  double _lineHeight = 1.65;
+  String _theme = 'dark';
+
+  @override
+  void initState() {
+    super.initState();
+    _content = _loadContent();
+  }
+
+  Future<List<_Fb2Block>> _loadContent() async {
+    final source = await rootBundle.loadString(widget.assetPath);
+    final document = xml.XmlDocument.parse(source);
+    final bodies = document.findAllElements('body').toList();
+    final body = bodies.isEmpty ? document.rootElement : bodies.first;
+    final blocks = <_Fb2Block>[];
+
+    void collect(xml.XmlNode node) {
+      if (node is xml.XmlElement) {
+        final tag = node.name.local.toLowerCase();
+        if (tag == 'title') {
+          final value = node.innerText.replaceAll(RegExp(r'\s+'), ' ').trim();
+          if (value.isNotEmpty) blocks.add(_Fb2Block(value, true));
+          return;
+        }
+        if (tag == 'p') {
+          final value = node.innerText.replaceAll(RegExp(r'\s+'), ' ').trim();
+          if (value.isNotEmpty) blocks.add(_Fb2Block(value, false));
+          return;
+        }
+      }
+      for (final child in node.children) {
+        collect(child);
+      }
+    }
+
+    collect(body);
+    return blocks;
+  }
+
+  Color get _background => _theme == 'light'
+      ? const Color(0xFFF4F1E8)
+      : _theme == 'sepia'
+          ? const Color(0xFFF0E1C5)
+          : VirilTheme.background;
+
+  Color get _foreground => _theme == 'dark'
+      ? const Color(0xFFE9ECF5)
+      : const Color(0xFF30291F);
+
+  Future<void> _showSettings() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: VirilTheme.panel,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const Text('Настройки чтения',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 14),
+              Row(children: [
+                const Text('Размер текста'),
+                const Spacer(),
+                IconButton(onPressed: () => setSheetState(() =>
+                  _fontSize = (_fontSize - 1).clamp(13, 28).toDouble()),
+                  icon: const Icon(Icons.remove)),
+                Text(_fontSize.toInt().toString()),
+                IconButton(onPressed: () => setSheetState(() =>
+                  _fontSize = (_fontSize + 1).clamp(13, 28).toDouble()),
+                  icon: const Icon(Icons.add)),
+              ]),
+              Row(children: [
+                const Text('Интервал строк'),
+                const Spacer(),
+                DropdownButton<double>(
+                  value: _lineHeight,
+                  items: const [
+                    DropdownMenuItem(value: 1.4, child: Text('Компактный')),
+                    DropdownMenuItem(value: 1.65, child: Text('Обычный')),
+                    DropdownMenuItem(value: 1.9, child: Text('Свободный')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) setSheetState(() => _lineHeight = value);
+                  },
+                ),
+              ]),
+              Row(children: [
+                const Text('Оформление'),
+                const Spacer(),
+                DropdownButton<String>(
+                  value: _theme,
+                  items: const [
+                    DropdownMenuItem(value: 'dark', child: Text('Тёмное')),
+                    DropdownMenuItem(value: 'light', child: Text('Светлое')),
+                    DropdownMenuItem(value: 'sepia', child: Text('Сепия')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) setSheetState(() => _theme = value);
+                  },
+                ),
+              ]),
+              const SizedBox(height: 8),
+              SizedBox(width: double.infinity, child: FilledButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Готово'),
+              )),
+            ]),
+          ),
+        ),
+      ),
+    );
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _search.dispose();
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: _background,
+    appBar: AppBar(
+      backgroundColor: _background,
+      foregroundColor: _foreground,
+      title: Text(widget.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+      actions: [
+        IconButton(onPressed: _showSettings,
+          tooltip: 'Настройки чтения', icon: const Icon(Icons.text_fields)),
+      ],
+    ),
+    body: FutureBuilder<List<_Fb2Block>>(
+      future: _content,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Не удалось прочитать FB2: ' + snapshot.error.toString()));
+        }
+        final all = snapshot.data ?? const <_Fb2Block>[];
+        final query = _search.text.trim().toLowerCase();
+        final blocks = query.isEmpty ? all : all.where((block) =>
+          block.text.toLowerCase().contains(query)).toList();
+        return Column(children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 8, 14, 4),
+            child: TextField(
+              controller: _search,
+              onChanged: (_) => setState(() {}),
+              style: TextStyle(color: _foreground, fontSize: 13),
+              decoration: InputDecoration(
+                hintText: 'Поиск по книге',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _search.text.isEmpty ? null : IconButton(
+                  onPressed: () { _search.clear(); setState(() {}); },
+                  icon: const Icon(Icons.close),
+                ),
+              ),
+            ),
+          ),
+          Expanded(child: ListView.builder(
+            controller: _scroll,
+            padding: const EdgeInsets.fromLTRB(22, 12, 22, 36),
+            itemCount: blocks.length,
+            itemBuilder: (context, index) {
+              final block = blocks[index];
+              return Padding(
+                padding: EdgeInsets.only(bottom: block.heading ? 14 : 11, top: block.heading ? 12 : 0),
+                child: Text(
+                  block.text,
+                  textAlign: TextAlign.justify,
+                  style: TextStyle(
+                    color: _foreground,
+                    fontSize: block.heading ? _fontSize + 2 : _fontSize,
+                    fontWeight: block.heading ? FontWeight.w800 : FontWeight.w400,
+                    height: _lineHeight,
+                  ),
+                ),
+              );
+            },
+          )),
+        ]);
+      },
+    ),
+  );
+}
+
+class _Fb2Block {
+  const _Fb2Block(this.text, this.heading);
+  final String text;
+  final bool heading;
 }
