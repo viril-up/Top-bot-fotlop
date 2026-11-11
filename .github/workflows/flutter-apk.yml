@@ -28,10 +28,11 @@ jobs:
           cache: true
       - name: Generate Android project files
         run: |
-          mkdir -p assets
+          mkdir -p assets/books
           cp ../resources/icon.png assets/app_icon.png
           cp ../resources/splash.png assets/app_splash.png
           cp ../resources/profile-cover.jpg assets/profile-cover.jpg
+          cp ../books/*.fb2 assets/books/
           flutter create --platforms=android .
           python3 - <<'PY'
           from pathlib import Path
