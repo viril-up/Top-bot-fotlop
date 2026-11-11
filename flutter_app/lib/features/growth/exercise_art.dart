@@ -170,7 +170,7 @@ class _ExerciseArtPainter extends CustomPainter {
       final to = ascending ? from + 1 : from - 1;
       final raw = fraction < .72 ? 0.0 : (fraction - .72) / .28;
       final blend = raw * raw * (3 - 2 * raw);
-      final color = const Color(0xFF8BBBD8);
+      const color = Color(0xFF8BBBD8);
 
       canvas.drawPath(
         frames[from],
