@@ -43,6 +43,7 @@ jobs:
           gradle = Path("android/app/build.gradle.kts")
           source = gradle.read_text()
           source = source.replace('com.example.viril', 'com.viril.selfdev')
+          source = source.replace("compileSdk = flutter.compileSdkVersion", "compileSdk = 36")
           gradle.write_text(source)
 
           old_main = Path("android/app/src/main/kotlin/com/example/viril/MainActivity.kt")
