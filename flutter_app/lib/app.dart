@@ -110,9 +110,7 @@ class _VirilSplash extends StatelessWidget {
         child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('VIRIL', style: TextStyle(
-              fontSize: 32, letterSpacing: 8, fontWeight: FontWeight.w900,
-            )),
+            Image.asset('assets/app_splash.png', width: 190, height: 100, fit: BoxFit.contain),
             SizedBox(height: 22),
             SizedBox(
               width: 130,
