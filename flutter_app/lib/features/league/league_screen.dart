@@ -80,7 +80,7 @@ class _LeagueScreenState extends State<LeagueScreen> {
             .select('user_id,nickname,avatar,xp_total,season_xp,level,season_best')
             .eq('user_id', userId)
             .maybeSingle();
-        if (own is Map) {
+        if (own != null) {
           mine = Map<String, dynamic>.from(own);
           final count = await client
               .from('profiles')
