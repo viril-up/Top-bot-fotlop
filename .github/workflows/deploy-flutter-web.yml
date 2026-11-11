@@ -46,6 +46,11 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Enable Flutter Web platform
+        if: steps.check.outputs.ready == 'true'
+        working-directory: flutter_app
+        run: flutter create --platforms=web .
+
       - name: Get Flutter dependencies
         if: steps.check.outputs.ready == 'true'
         working-directory: flutter_app
