@@ -290,9 +290,9 @@ class _ProgressChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (values.isEmpty) return;
     const left = 30.0, right = 10.0, top = 12.0, bottom = 27.0;
-    final chartWidth = math.max(1.0, size.width - left - right);
-    final chartHeight = math.max(1.0, size.height - top - bottom);
-    final maximum = math.max(4.0, values.reduce(math.max) * 1.15);
+    final chartWidth = math.max(1.0, size.width - left - right).toDouble();
+    final chartHeight = math.max(1.0, size.height - top - bottom).toDouble();
+    final maximum = math.max(4.0, values.reduce((a, b) => math.max(a, b).toDouble()) * 1.15).toDouble();
     Offset point(int index) => Offset(
       left + chartWidth * (values.length <= 1 ? 0 : index / (values.length - 1)),
       top + chartHeight * (1 - values[index] / maximum),
@@ -358,7 +358,7 @@ class _ProgressChartPainter extends CustomPainter {
         textDirection: TextDirection.ltr,
       )..layout();
       label.paint(canvas, Offset(
-        (point(i).dx - label.width / 2).clamp(0.0, size.width - label.width),
+        (point(i).dx - label.width / 2).clamp(0.0, size.width - label.width).toDouble(),
         size.height - 16,
       ));
     }
