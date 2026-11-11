@@ -27,7 +27,43 @@ jobs:
           channel: stable
           cache: true
       - name: Generate Android project files
-        run: flutter create --platforms=android .
+        run: |
+          flutter create --platforms=android .
+          python3 - <<'PY'
+          from pathlib import Path
+
+          gradle = Path("android/app/build.gradle.kts")
+          source = gradle.read_text()
+          source = source.replace('com.example.viril', 'com.viril.selfdev')
+          gradle.write_text(source)
+
+          old_main = Path("android/app/src/main/kotlin/com/example/viril/MainActivity.kt")
+          new_dir = Path("android/app/src/main/kotlin/com/viril/selfdev")
+          new_dir.mkdir(parents=True, exist_ok=True)
+          new_main = new_dir / "MainActivity.kt"
+          new_main.write_text(
+              "package com.viril.selfdev\n\n"
+              "import io.flutter.embedding.android.FlutterActivity\n\n"
+              "class MainActivity : FlutterActivity()\n"
+          )
+          if old_main.exists():
+              old_main.unlink()
+
+          manifest = Path("android/app/src/main/AndroidManifest.xml")
+          xml = manifest.read_text().replace('android:label="viril"', 'android:label="Viril"')
+          marker = "</activity>"
+          callback = '''
+                  <intent-filter>
+                      <action android:name="android.intent.action.VIEW" />
+                      <category android:name="android.intent.category.DEFAULT" />
+                      <category android:name="android.intent.category.BROWSABLE" />
+                      <data android:scheme="io.supabase.flutter" android:host="login-callback" />
+                  </intent-filter>
+          '''
+          if "io.supabase.flutter" not in xml:
+              xml = xml.replace(marker, callback + "\\n                " + marker, 1)
+          manifest.write_text(xml)
+          PY
       - name: Resolve packages
         run: flutter pub get
       - name: Analyze
