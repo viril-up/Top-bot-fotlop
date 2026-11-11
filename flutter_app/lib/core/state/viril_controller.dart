@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -6,9 +7,17 @@ import '../data/viril_repository.dart';
 import '../models/viril_state.dart';
 
 class VirilController extends ChangeNotifier {
-  VirilController(this.repository);
+  VirilController(this.repository) {
+    // Keep every screen in sync when Supabase completes the Google OAuth
+    // redirect and updates the current identity/session.
+    _authSubscription = repository.client.auth.onAuthStateChange.listen((_) {
+      cloudAvailable = repository.cloudReady;
+      notifyListeners();
+    });
+  }
 
   final VirilRepository repository;
+  late final StreamSubscription _authSubscription;
   VirilState state = VirilState.defaults();
   bool initialized = false;
   bool cloudAvailable = false;
@@ -75,6 +84,9 @@ class VirilController extends ChangeNotifier {
       );
     } catch (error) {
       lastError = error.toString();
+    } finally {
+      // The leaderboard is backed by profile/season rows updated by the RPC.
+      notifyListeners();
     }
   }
 
@@ -162,6 +174,7 @@ class VirilController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _authSubscription.cancel();
     repository.dispose();
     super.dispose();
   }
