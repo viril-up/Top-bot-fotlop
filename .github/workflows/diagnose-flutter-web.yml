@@ -1,0 +1,75 @@
+name: Diagnose Viril Flutter Web in Chromium
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Enable web and build
+        working-directory: flutter_app
+        run: |
+          flutter create --platforms=web .
+          flutter pub get
+          flutter build web --release --no-web-resources-cdn --base-href "/Viril-self-developement/flutter/" --output ../build/web
+
+      - name: Install Chromium and Playwright
+        run: |
+          npm init -y
+          npm install --save-dev playwright
+          npx playwright install --with-deps chromium
+
+      - name: Run app in real headless browser
+        run: |
+          cat > browser-test.cjs <<'EOF'
+          const { chromium } = require('playwright');
+          const { spawn } = require('child_process');
+          (async () => {
+            const server = spawn('python3', ['-m', 'http.server', '4173', '--directory', 'build'], { stdio: 'inherit' });
+            const browser = await chromium.launch({ headless: true });
+            const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+            const errors = [];
+            page.on('pageerror', e => errors.push('PAGEERROR: ' + e.stack));
+            page.on('console', m => { if (m.type() === 'error') errors.push('CONSOLE: ' + m.text()); });
+            page.on('requestfailed', r => errors.push('REQUESTFAILED: ' + r.url() + ' ' + r.failure()?.errorText));
+            try {
+              await page.goto('http://127.0.0.1:4173/web/', { waitUntil: 'networkidle', timeout: 60000 });
+              await page.waitForTimeout(12000);
+              await page.screenshot({ path: 'viril-browser.png', fullPage: true });
+              const info = await page.evaluate(() => ({
+                title: document.title,
+                bodyText: document.body.innerText,
+                canvases: [...document.querySelectorAll('canvas')].map(c => ({width:c.width,height:c.height,rect:c.getBoundingClientRect().toJSON()})),
+                flutterView: !!document.querySelector('flutter-view'),
+                bodyBackground: getComputedStyle(document.body).backgroundColor
+              }));
+              console.log('BROWSER_RESULT=' + JSON.stringify(info));
+              console.log('BROWSER_ERRORS=' + JSON.stringify(errors));
+              if (!info.canvases.length || !info.canvases.some(c => c.width > 0 && c.height > 0)) process.exitCode = 1;
+              if (errors.some(e => /Uncaught|TypeError|ReferenceError|Failed to load|404/i.test(e))) process.exitCode = 1;
+            } finally {
+              await browser.close();
+              server.kill();
+            }
+          })().catch(e => { console.error(e); process.exit(1); });
+          EOF
+          node browser-test.cjs
+
+      - name: Upload browser screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: viril-browser-diagnostic
+          path: viril-browser.png
+          if-no-files-found: ignore
