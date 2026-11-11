@@ -119,7 +119,7 @@ class _VirilSplash extends StatelessWidget {
               child: LinearProgressIndicator(
                 minHeight: 3,
                 backgroundColor: Color(0xFF26334A),
-                color: VirilTheme.blue,
+                color: Colors.white,
               ),
             ),
           ],
