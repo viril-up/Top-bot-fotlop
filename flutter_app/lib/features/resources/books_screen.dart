@@ -815,18 +815,6 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
   );
 }
 
-String _joinEpubPath(String packagePath, String href) {
-  final base = packagePath.split('/')..removeLast();
-  for (final segment in href.split('/')) {
-    if (segment.isEmpty || segment == '.') continue;
-    if (segment == '..') {
-      if (base.isNotEmpty) base.removeLast();
-    } else {
-      base.add(Uri.decodeComponent(segment));
-    }
-  }
-  return base.join('/');
-}
 
 class _ReaderBlock {
   const _ReaderBlock(this.text, this.heading, [this.listItem = false]);
