@@ -843,11 +843,31 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTi
             ],
           ),
         ),
-        body: TabBarView(controller: _tabs, children: [
-          _catalogTab(),
-          _queueTab(),
-          _programsTab(),
-          _historyTab(),
+        body: Column(children: [
+          if (_artImportedCount == 0)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(children: [
+                    const Icon(Icons.animation_rounded, color: VirilTheme.blue, size: 25),
+                    const SizedBox(width: 10),
+                    const Expanded(child: Text(
+                      'Подключи ZIP-архив векторных анимаций, чтобы увидеть иллюстрации движений упражнений.',
+                      style: TextStyle(color: Colors.white70, fontSize: 11, height: 1.35),
+                    )),
+                    TextButton(onPressed: _importAnimations, child: const Text('Импорт')),
+                  ]),
+                ),
+              ),
+            ),
+          Expanded(child: TabBarView(controller: _tabs, children: [
+            _catalogTab(),
+            _queueTab(),
+            _programsTab(),
+            _historyTab(),
+          ])),
         ]),
       );
   }
