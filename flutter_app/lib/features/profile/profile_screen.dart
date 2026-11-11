@@ -109,7 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(action, style: TextStyle(
-              color: destructive ? VirilTheme.red : VirilTheme.blue,
+              color: destructive ? Colors.redAccent : VirilTheme.blue,
             )),
           ),
         ],
@@ -325,7 +325,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _section('Данные и безопасность', [
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.restart_alt, color: VirilTheme.red),
+                leading: const Icon(Icons.restart_alt, color: Colors.redAccent),
                 title: const Text('Сбросить прогресс'),
                 subtitle: const Text('Удалить цели, опыт и дневник на этом устройстве'),
                 onTap: () => _confirmAction(
@@ -339,7 +339,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (registered)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.delete_forever_outlined, color: VirilTheme.red),
+                  leading: const Icon(Icons.delete_forever_outlined, color: Colors.redAccent),
                   title: const Text('Удалить аккаунт'),
                   subtitle: const Text('Удаление аккаунта и связанных облачных данных'),
                   onTap: () => _confirmAction(
@@ -358,7 +358,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(widget.controller.lastError!,
-                  style: const TextStyle(color: VirilTheme.red, fontSize: 11)),
+                  style: const TextStyle(color: Colors.redAccent, fontSize: 11)),
               ),
           ],
         ),
