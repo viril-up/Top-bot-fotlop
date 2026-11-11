@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:xml/xml.dart' as xml;
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_epub/flutter_epub.dart' hide DefaultBuilderOptions;
+import 'package:epub_view/epub_view.dart' hide DefaultBuilderOptions;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdfx/pdfx.dart';
