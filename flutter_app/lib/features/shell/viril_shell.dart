@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../core/state/viril_controller.dart';
 import '../home/home_screen.dart';
 import '../growth/growth_screen.dart';
-import '../placeholders/section_screen.dart';
 import '../profile/profile_screen.dart';
 import '../progress/progress_screen.dart';
 import '../league/league_screen.dart';
