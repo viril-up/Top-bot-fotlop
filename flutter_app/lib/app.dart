@@ -107,7 +107,7 @@ class _VirilSplash extends StatelessWidget {
             colors: [Color(0xFF1C2D4A), VirilTheme.background],
           ),
         ),
-        child: const Column(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset('assets/app_splash.png', width: 190, height: 100, fit: BoxFit.contain),
