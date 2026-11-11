@@ -84,7 +84,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
       final values = days.map((day) => day.value.toDouble()).toList();
       final total = values.fold<double>(0, (sum, value) => sum + value);
       final average = values.isEmpty ? 0.0 : total / values.length;
-      final best = values.isEmpty ? 0.0 : values.reduce(math.max);
+      final best = values.isEmpty ? 0.0 : values.reduce((a, b) => math.max(a, b).toDouble());
       final selectedIndex = _selected < 0 || _selected >= days.length ? days.length - 1 : _selected;
       final selectedDay = days.isEmpty ? null : days[selectedIndex];
       final unit = _metric == 'xp' ? 'XP' : _metric == 'goals' ? 'целей' : 'подходов';
