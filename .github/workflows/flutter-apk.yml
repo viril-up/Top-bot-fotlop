@@ -28,6 +28,8 @@ jobs:
           cache: true
       - name: Generate Android project files
         run: |
+          mkdir -p assets
+          cp ../resources/icon.png assets/app_icon.png
           flutter create --platforms=android .
           python3 - <<'PY'
           from pathlib import Path
@@ -66,6 +68,10 @@ jobs:
           PY
       - name: Resolve packages
         run: flutter pub get
+      - name: Generate original Viril icon and native splash
+        run: |
+          dart run flutter_launcher_icons
+          dart run flutter_native_splash:create
       - name: Analyze
         run: flutter analyze --no-fatal-infos
       - name: Test legacy state compatibility
