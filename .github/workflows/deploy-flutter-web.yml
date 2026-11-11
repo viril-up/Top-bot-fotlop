@@ -56,10 +56,22 @@ jobs:
         working-directory: flutter_app
         run: flutter pub get
 
-      - name: Build Flutter Web
+      - name: Build Flutter Web with local engine resources
         if: steps.check.outputs.ready == 'true'
         working-directory: flutter_app
-        run: flutter build web --release --base-href "/Viril-self-developement/flutter/" --output ../build/web
+        run: flutter build web --release --no-web-resources-cdn --web-content-hash --base-href "/Viril-self-developement/flutter/" --output ../build/web
+
+      - name: Verify Flutter Web output
+        if: steps.check.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -e
+          test -s build/web/index.html
+          test -s build/web/flutter_bootstrap.js
+          test -s build/web/main.dart.js
+          test -s build/web/canvaskit/canvaskit.js
+          grep -F '<base href="/Viril-self-developement/flutter/">' build/web/index.html
+          echo "Flutter Web entry point and local CanvasKit assets are present."
 
       - name: Assemble website without replacing the legacy app
         if: steps.check.outputs.ready == 'true'
