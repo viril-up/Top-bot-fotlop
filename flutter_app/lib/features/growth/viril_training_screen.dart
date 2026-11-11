@@ -54,7 +54,7 @@ class VirilTrainingScreen extends StatefulWidget {
   State<VirilTrainingScreen> createState() => _VirilTrainingScreenState();
 }
 
-class _VirilTrainingScreenState extends State<VirilTrainingScreen> {
+class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTickerProviderStateMixin {
   static const _storageKey = 'viril_training_v1';
   static const _muscles = {
     'chest': 'Грудь', 'shoulders': 'Плечи', 'biceps': 'Бицепс',
@@ -73,6 +73,7 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> {
   static final _staticPattern =
       RegExp(r'(hold|plank|hang|stretch|pose|carry|walk|run|cycling|swimming|erg|trainer)', caseSensitive: false);
 
+  late final TabController _tabs;
   final _searchController = TextEditingController();
   List<TrainingExercise> _exercises = [];
   List<Map<String, dynamic>> _programs = [];
@@ -102,6 +103,7 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> {
   @override
   void initState() {
     super.initState();
+    _tabs = TabController(length: 4, vsync: this);
     _searchController.addListener(() => setState(() => _catalogLimit = 48));
     _load();
   }
@@ -109,6 +111,7 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _tabs.dispose();
     super.dispose();
   }
 
@@ -164,6 +167,27 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> {
           _equipmentFilter.isEmpty || exercise.equipment == _equipmentFilter;
       return matchesMuscle && matchesSearch && matchesDifficulty && matchesEquipment;
     }).toList();
+  }
+
+
+  TrainingExercise? _findProgramExercise(String id) {
+    final normalized = _normal(id.replaceAll('-', ' '));
+    for (final exercise in _exercises) {
+      if (exercise.id == id ||
+          exercise.art == id ||
+          exercise.aliases.contains(id) ||
+          _normal(exercise.name) == normalized) {
+        return exercise;
+      }
+    }
+    return null;
+  }
+
+  TrainingExercise? _findExerciseById(String id) {
+    for (final exercise in _exercises) {
+      if (exercise.id == id) return exercise;
+    }
+    return null;
   }
 
   int _rate(TrainingExercise exercise) => _rates[exercise.difficulty] ?? 1;
@@ -275,16 +299,14 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> {
     _training['queue'] = queue;
     _training['sessionStarted'] ??= DateTime.now().toIso8601String();
     await _save();
-    if (mounted) DefaultTabController.of(context).animateTo(1);
+    if (mounted) _tabs.animateTo(1);
   }
 
   Future<void> _addProgram(Map<String, dynamic> program) async {
     final ids = (program['ids'] as List? ?? const []).map((e) => e.toString());
     var added = 0;
     for (final id in ids) {
-      final exercise = _exercises.where((e) =>
-        e.id == id || e.art == id || e.aliases.contains(id) ||
-        _normal(e.name) == _normal(id.replaceAll('-', ' '))).firstOrNull;
+      final exercise = _findProgramExercise(id);
       if (exercise == null) continue;
       final queue = _queue;
       if (queue.any((item) => item['exerciseId'] == exercise.id)) continue;
@@ -312,17 +334,17 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> {
     final queue = _queue;
     if (index < 0 || index >= queue.length) return;
     final item = queue[index];
-    final sets = max(1, (item['sets'] as num?)?.toInt() ?? 3);
-    final reps = max(1, (item['reps'] as num?)?.toInt() ?? 10);
+    final sets = max(1, (item['sets'] as num?)?.toInt() ?? 3).toInt();
+    final reps = max(1, (item['reps'] as num?)?.toInt() ?? 10).toInt();
     final done = (item['done'] as List? ?? const [])
         .map((e) => (e as num).toInt()).toList();
     if (done.length >= sets) return;
-    final exercise = _exercises.where((e) => e.id == item['exerciseId']).firstOrNull;
+    final exercise = _findExerciseById((item['exerciseId'] ?? '').toString());
     final difficulty = (item['difficulty'] ?? 'Beginner').toString();
     final base = _rates[difficulty] ?? 1;
     final isStatic = item['static'] == true;
     final units = isStatic ? (reps ~/ 10) : reps;
-    final award = max(isStatic ? 1 : 0, units * base) + 2;
+    final award = (max(isStatic ? 1 : 0, units * base) + 2).toInt();
     done.add(done.length);
     item['done'] = done;
     queue[index] = item;
@@ -495,7 +517,7 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> {
           const Text('Выбери упражнения в каталоге и добавь их в свой план.',
             textAlign: TextAlign.center, style: TextStyle(color: Colors.white54, fontSize: 12)),
           const SizedBox(height: 14),
-          FilledButton(onPressed: () => DefaultTabController.of(context).animateTo(0),
+          FilledButton(onPressed: () => _tabs.animateTo(0),
             child: const Text('Открыть каталог')),
         ]),
       ));
@@ -657,12 +679,11 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> {
           child: Text('Не удалось загрузить каталог: $_loadError'),
         )));
     }
-    return DefaultTabController(
-      length: 4,
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: const Text('Viril Training', style: TextStyle(fontWeight: FontWeight.w800)),
-          bottom: const TabBar(
+          bottom: TabBar(
+            controller: _tabs,
             isScrollable: true,
             tabs: [
               Tab(text: 'Каталог'),
@@ -672,13 +693,12 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> {
             ],
           ),
         ),
-        body: TabBarView(children: [
+        body: TabBarView(controller: _tabs, children: [
           _catalogTab(),
           _queueTab(),
           _programsTab(),
           _historyTab(),
         ]),
-      ),
-    );
+      );
   }
 }
