@@ -5,7 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:xml/xml.dart' as xml;
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:epub_view/epub_view.dart' hide DefaultBuilderOptions;
+import 'package:archive/archive.dart';
+import 'package:html/dom.dart' as html_dom;
+import 'package:html/parser.dart' as html_parser;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -217,14 +219,24 @@ class _BooksScreenState extends State<BooksScreen> {
       final path = book.localPath ?? await _download(book, keepOffline: false);
       if (!mounted) return;
       setState(() => _opening = null);
-      await Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => BookReaderScreen(
-          title: book.title,
-          path: path,
-          isEpub: book.name.toLowerCase().endsWith('.epub'),
-          isOffline: book.localPath != null,
-        ),
-      ));
+      if (book.name.toLowerCase().endsWith('.epub')) {
+        await Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => EpubReaderScreen(
+            title: book.title,
+            path: path,
+            isOffline: book.localPath != null,
+          ),
+        ));
+      } else {
+        await Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => BookReaderScreen(
+            title: book.title,
+            path: path,
+            isEpub: false,
+            isOffline: book.localPath != null,
+          ),
+        ));
+      }
     } catch (error) {
       if (!mounted) return;
       setState(() => _opening = null);
@@ -454,27 +466,19 @@ class BookReaderScreen extends StatefulWidget {
 
 class _BookReaderScreenState extends State<BookReaderScreen> {
   PdfControllerPinch? _pdfController;
-  EpubController? _epubController;
   String? _readerError;
 
   @override
   void initState() {
     super.initState();
-    if (widget.isEpub) {
-      _epubController = EpubController(
-        document: EpubDocument.openFile(File(widget.path)),
-      );
-    } else {
-      _pdfController = PdfControllerPinch(
-        document: PdfDocument.openFile(widget.path),
-      );
-    }
+    _pdfController = PdfControllerPinch(
+      document: PdfDocument.openFile(widget.path),
+    );
   }
 
   @override
   void dispose() {
     _pdfController?.dispose();
-    _epubController?.dispose();
     super.dispose();
   }
 
@@ -490,41 +494,344 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
           ),
       ],
     ),
-    drawer: widget.isEpub && _epubController != null
-      ? Drawer(child: SafeArea(
-          child: EpubViewTableOfContents(controller: _epubController!),
-        ))
-      : null,
     body: _readerError != null
       ? Center(child: Padding(
           padding: const EdgeInsets.all(20),
           child: Text(_readerError!, textAlign: TextAlign.center),
         ))
-      : widget.isEpub
-        ? EpubView(
-            controller: _epubController!,
-            onDocumentError: (error) {
-              if (mounted) setState(() => _readerError = error.toString());
-            },
-          )
-        : PdfViewPinch(
-            controller: _pdfController!,
-            builders: PdfViewPinchBuilders<DefaultBuilderOptions>(
-              options: const DefaultBuilderOptions(),
-              documentLoaderBuilder: (_) => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              pageLoaderBuilder: (_) => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              errorBuilder: (_, error) => Center(
-                child: Text('Не удалось открыть PDF: ' + error.toString()),
-              ),
+      : PdfViewPinch(
+          controller: _pdfController!,
+          builders: PdfViewPinchBuilders<DefaultBuilderOptions>(
+            options: const DefaultBuilderOptions(),
+            documentLoaderBuilder: (_) => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            pageLoaderBuilder: (_) => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            errorBuilder: (_, error) => Center(
+              child: Text('Не удалось открыть PDF: ' + error.toString()),
             ),
           ),
+        ),
   );
 }
 
+class EpubReaderScreen extends StatefulWidget {
+  const EpubReaderScreen({
+    super.key,
+    required this.title,
+    required this.path,
+    required this.isOffline,
+  });
+
+  final String title;
+  final String path;
+  final bool isOffline;
+
+  @override
+  State<EpubReaderScreen> createState() => _EpubReaderScreenState();
+}
+
+class _EpubReaderScreenState extends State<EpubReaderScreen> {
+  late Future<List<_ReaderBlock>> _content;
+  final _search = TextEditingController();
+  final _scroll = ScrollController();
+  double _fontSize = 17;
+  double _lineHeight = 1.65;
+  String _theme = 'dark';
+
+  Color get _background => _theme == 'light'
+      ? const Color(0xFFF4F1E8)
+      : _theme == 'sepia'
+          ? const Color(0xFFF0E1C5)
+          : VirilTheme.background;
+
+  Color get _foreground => _theme == 'dark'
+      ? const Color(0xFFE9ECF5)
+      : const Color(0xFF30291F);
+
+  @override
+  void initState() {
+    super.initState();
+    _content = _loadEpub();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _fontSize = prefs.getDouble('viril_reader_font_size') ?? 17;
+      _lineHeight = prefs.getDouble('viril_reader_line_height') ?? 1.65;
+      _theme = prefs.getString('viril_reader_theme') ?? 'dark';
+    });
+  }
+
+  Future<List<_ReaderBlock>> _loadEpub() async {
+    final bytes = await File(widget.path).readAsBytes();
+    final archive = ZipDecoder().decodeBytes(bytes);
+    final files = <String, ArchiveFile>{
+      for (final file in archive.where((entry) => entry.isFile))
+        file.name.replaceAll(r'\', '/'): file,
+    };
+
+    List<int> bytesOf(String path) {
+      final file = files[path];
+      if (file == null) throw FormatException('В EPUB отсутствует файл $path');
+      final content = file.content;
+      if (content is List<int>) return content;
+      throw FormatException('Не удалось прочитать файл $path');
+    }
+
+    String textOf(String path) => utf8.decode(bytesOf(path), allowMalformed: true);
+
+    final container = xml.XmlDocument.parse(textOf('META-INF/container.xml'));
+    final rootfile = container.findAllElements('rootfile').firstOrNull;
+    final packagePath = rootfile?.getAttribute('full-path');
+    if (packagePath == null || packagePath.isEmpty) {
+      throw const FormatException('В EPUB не найден package.opf');
+    }
+
+    final packageDoc = xml.XmlDocument.parse(textOf(packagePath));
+    final manifest = <String, String>{};
+    for (final item in packageDoc.findAllElements('item')) {
+      final id = item.getAttribute('id');
+      final href = item.getAttribute('href');
+      if (id != null && href != null) {
+        manifest[id] = _joinEpubPath(packagePath, href);
+      }
+    }
+
+    final blocks = <_ReaderBlock>[];
+    final spine = packageDoc.findAllElements('spine').firstOrNull;
+    if (spine == null) throw const FormatException('В EPUB отсутствует порядок глав');
+
+    for (final itemRef in spine.findAllElements('itemref')) {
+      final id = itemRef.getAttribute('idref');
+      final chapterPath = id == null ? null : manifest[id];
+      if (chapterPath == null || !files.containsKey(chapterPath)) continue;
+      final document = html_parser.parse(textOf(chapterPath));
+      final body = document.body;
+      if (body == null) continue;
+
+      void visit(html_dom.Node node) {
+        if (node is html_dom.Element) {
+          final tag = (node.localName ?? '').toLowerCase();
+          if (const {'h1','h2','h3','h4','h5','h6','p','li','blockquote'}.contains(tag)) {
+            final value = node.text.replaceAll(RegExp(r'\s+'), ' ').trim();
+            if (value.isNotEmpty) {
+              blocks.add(_ReaderBlock(
+                value,
+                tag.startsWith('h'),
+                tag == 'li',
+              ));
+            }
+            return;
+          }
+        }
+        for (final child in node.nodes) {
+          visit(child);
+        }
+      }
+
+      visit(body);
+    }
+
+    if (blocks.isEmpty) {
+      throw const FormatException('В EPUB не найден читаемый текст');
+    }
+    return blocks;
+  }
+
+  String _joinEpubPath(String packagePath, String href) {
+    final base = packagePath.split('/')..removeLast();
+    for (final segment in href.split('/')) {
+      if (segment.isEmpty || segment == '.') continue;
+      if (segment == '..') {
+        if (base.isNotEmpty) base.removeLast();
+      } else {
+        base.add(Uri.decodeComponent(segment));
+      }
+    }
+    return base.join('/');
+  }
+
+  Future<void> _showSettings() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: VirilTheme.panel,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const Text('Настройки чтения',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 14),
+              Row(children: [
+                const Text('Размер текста'),
+                const Spacer(),
+                IconButton(onPressed: () => setSheetState(() =>
+                  _fontSize = (_fontSize - 1).clamp(13, 28).toDouble()),
+                  icon: const Icon(Icons.remove)),
+                Text(_fontSize.toInt().toString()),
+                IconButton(onPressed: () => setSheetState(() =>
+                  _fontSize = (_fontSize + 1).clamp(13, 28).toDouble()),
+                  icon: const Icon(Icons.add)),
+              ]),
+              Row(children: [
+                const Text('Интервал строк'),
+                const Spacer(),
+                DropdownButton<double>(
+                  value: _lineHeight,
+                  items: const [
+                    DropdownMenuItem(value: 1.4, child: Text('Компактный')),
+                    DropdownMenuItem(value: 1.65, child: Text('Обычный')),
+                    DropdownMenuItem(value: 1.9, child: Text('Свободный')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) setSheetState(() => _lineHeight = value);
+                  },
+                ),
+              ]),
+              Row(children: [
+                const Text('Оформление'),
+                const Spacer(),
+                DropdownButton<String>(
+                  value: _theme,
+                  items: const [
+                    DropdownMenuItem(value: 'dark', child: Text('Тёмное')),
+                    DropdownMenuItem(value: 'light', child: Text('Светлое')),
+                    DropdownMenuItem(value: 'sepia', child: Text('Сепия')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) setSheetState(() => _theme = value);
+                  },
+                ),
+              ]),
+              const SizedBox(height: 8),
+              SizedBox(width: double.infinity, child: FilledButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Готово'),
+              )),
+            ]),
+          ),
+        ),
+      ),
+    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('viril_reader_font_size', _fontSize);
+    await prefs.setDouble('viril_reader_line_height', _lineHeight);
+    await prefs.setString('viril_reader_theme', _theme);
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _search.dispose();
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: _background,
+    appBar: AppBar(
+      backgroundColor: _background,
+      foregroundColor: _foreground,
+      title: Text(widget.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+      actions: [
+        if (widget.isOffline)
+          const Icon(Icons.offline_pin_rounded, color: VirilTheme.green),
+        IconButton(onPressed: _showSettings,
+          tooltip: 'Настройки чтения', icon: const Icon(Icons.text_fields)),
+      ],
+    ),
+    body: FutureBuilder<List<_ReaderBlock>>(
+      future: _content,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Text('Не удалось открыть EPUB: ' + snapshot.error.toString(),
+              textAlign: TextAlign.center),
+          ));
+        }
+        final all = snapshot.data ?? const <_ReaderBlock>[];
+        final query = _search.text.trim().toLowerCase();
+        final blocks = query.isEmpty ? all : all.where((block) =>
+          block.text.toLowerCase().contains(query)).toList();
+        return Column(children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 8, 14, 4),
+            child: TextField(
+              controller: _search,
+              onChanged: (_) => setState(() {}),
+              style: TextStyle(color: _foreground, fontSize: 13),
+              decoration: InputDecoration(
+                hintText: 'Поиск по книге',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _search.text.isEmpty ? null : IconButton(
+                  onPressed: () { _search.clear(); setState(() {}); },
+                  icon: const Icon(Icons.close),
+                ),
+              ),
+            ),
+          ),
+          Expanded(child: ListView.builder(
+            controller: _scroll,
+            padding: const EdgeInsets.fromLTRB(22, 12, 22, 36),
+            itemCount: blocks.length,
+            itemBuilder: (context, index) {
+              final block = blocks[index];
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: block.listItem ? 12 : 0,
+                  bottom: block.heading ? 14 : 11,
+                  top: block.heading ? 12 : 0,
+                ),
+                child: Text(
+                  block.text,
+                  textAlign: TextAlign.justify,
+                  style: TextStyle(
+                    color: _foreground,
+                    fontSize: block.heading ? _fontSize + 2 : _fontSize,
+                    fontWeight: block.heading ? FontWeight.w800 : FontWeight.w400,
+                    height: _lineHeight,
+                  ),
+                ),
+              );
+            },
+          )),
+        ]);
+      },
+    ),
+  );
+}
+
+String _joinEpubPath(String packagePath, String href) {
+  final base = packagePath.split('/')..removeLast();
+  for (final segment in href.split('/')) {
+    if (segment.isEmpty || segment == '.') continue;
+    if (segment == '..') {
+      if (base.isNotEmpty) base.removeLast();
+    } else {
+      base.add(Uri.decodeComponent(segment));
+    }
+  }
+  return base.join('/');
+}
+
+class _ReaderBlock {
+  const _ReaderBlock(this.text, this.heading, [this.listItem = false]);
+  final String text;
+  final bool heading;
+  final bool listItem;
+}
 
 class Fb2ReaderScreen extends StatefulWidget {
   const Fb2ReaderScreen({
