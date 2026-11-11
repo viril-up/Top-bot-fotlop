@@ -210,6 +210,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Expanded(child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const Text('ТВОЙ ПУТЬ', style: TextStyle(color: Colors.white54, fontSize: 9, letterSpacing: 1.3, fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 4),
                       Text(state.nickname, maxLines: 1, overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
                       const SizedBox(height: 4),
@@ -367,7 +369,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.telegram, color: VirilTheme.blue),
+                leading: const Icon(Icons.send_rounded, color: VirilTheme.blue),
                 title: const Text('Менеджер TG'),
                 subtitle: const Text('@virilgo'),
                 onTap: () => _openExternal('https://t.me/virilgo'),
