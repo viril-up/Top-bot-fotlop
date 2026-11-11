@@ -18,7 +18,10 @@ The public/anon key is not a service-role secret. Never place a service-role key
 
 ## Migration plan
 - [x] Create an isolated Flutter/Dart application shell and module boundaries.
-- [ ] Port the existing XP/level/streak/goals state model and local persistence.
+- [x] Port the legacy JSON state model, XP/level/streak rules, goal completion, daily rollover and local persistence.
+- [x] Connect the existing Supabase project and preserve the `game_saves` JSON save contract.
+- [x] Add initial Flutter home actions for goals, diary entries and Pomodoro focus sessions.
+- [x] Add regression tests for legacy XP, goal, workout cap and daily rollover rules.
 - [ ] Port Supabase anonymous auth, Google identity linking, profile sync, leaderboard RPCs and account deletion flow.
 - [ ] Port resources and the offline FB2/PDF/EPUB reader; preserve book files and metadata.
 - [ ] Port training catalog/programs and import the full exercise animation archive.
@@ -27,4 +30,4 @@ The public/anon key is not a service-role secret. Never place a service-role key
 - [ ] Run parity tests against the current web version before replacing any production workflow.
 
 ## Current status
-This is the first migration foundation, not a feature-complete replacement yet. Several screens intentionally show migration placeholders. Keep production on the current main branch until feature parity and APK testing are complete.
+Migration status: the first native data/persistence layer and interactive home features are in place. Resources, full training animations, analytics, leaderboard, complete profile/settings, OAuth deep-link recovery, and the offline PDF/EPUB reader are still being ported. The existing web app remains the feature-complete production fallback. Keep production on the current main branch until feature parity and APK testing are complete.
