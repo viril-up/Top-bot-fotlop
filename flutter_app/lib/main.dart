@@ -198,7 +198,7 @@ class _VirilHomeState extends State<VirilHome> {
   Future<void> _toggleGoal(_Goal goal) async {
     setState(() {
       goal.done = !goal.done;
-      _xp = (_xp + (goal.done ? goal.xp : -goal.xp)).clamp(0, 999999);
+      _xp = (_xp + (goal.done ? goal.xp : -goal.xp)).clamp(0, 999999).toInt();
     });
     await _save();
   }
@@ -407,7 +407,7 @@ class _VirilHomeState extends State<VirilHome> {
       _iconSquare(icon, _blue),
       const SizedBox(width: 12),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.w750, fontSize: 13)),
+        Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
         const SizedBox(height: 3),
         Text(subtitle, style: const TextStyle(color: _muted, fontSize: 10)),
       ])),
@@ -435,7 +435,7 @@ class _VirilHomeState extends State<VirilHome> {
       Container(width: 48, height: 58, decoration: BoxDecoration(color: _panel2, borderRadius: BorderRadius.circular(12)), child: Center(child: Text(emoji, style: const TextStyle(fontSize: 24)))),
       const SizedBox(width: 12),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.w750, fontSize: 13)),
+        Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
         const SizedBox(height: 4),
         Text(subtitle, style: const TextStyle(color: _muted, fontSize: 11)),
       ])),
@@ -478,7 +478,7 @@ class _VirilHomeState extends State<VirilHome> {
       ],
     ));
     if (value != null && value.trim().isNotEmpty) {
-      setState(() => _nickname = value.trim().substring(0, value.trim().length.clamp(0, 24)));
+      setState(() => _nickname = value.trim().substring(0, value.trim().length.clamp(0, 24).toInt()));
       await _save();
     }
   }
@@ -488,7 +488,7 @@ class _VirilHomeState extends State<VirilHome> {
     child: _sectionCard(child: Row(children: [
       Icon(icon, color: _blue, size: 19),
       const SizedBox(width: 11),
-      Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w650, fontSize: 12))),
+      Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
       Text(value, style: const TextStyle(color: _muted, fontSize: 10)),
     ])),
   );
