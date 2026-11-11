@@ -147,7 +147,10 @@ class VirilRepository {
     }
     // Link Google to the existing guest user instead of making a second
     // account, exactly as the old web app did.
-    await client.auth.linkIdentity(OAuthProvider.google);
+    await client.auth.linkIdentity(
+      OAuthProvider.google,
+      redirectTo: 'io.supabase.flutter://login-callback',
+    );
   }
 
   Future<void> updateProfile(String nickname, String avatar) async {
