@@ -168,6 +168,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     builder: (context, _) {
       final state = widget.controller.state;
       final registered = widget.controller.isRegistered;
+      final accountEmail = widget.controller.repository.user?.email ?? '';
       final streak = state.currentStreak();
       final tag = state.data['playerTag']?.toString() ?? '';
       final diaryCount = state.diary.length;
@@ -245,7 +246,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   color: registered ? VirilTheme.green : VirilTheme.blue),
                 title: Text(registered ? 'Google подключён' : 'Гостевой аккаунт'),
                 subtitle: Text(registered
-                  ? 'Прогресс связан с аккаунтом'
+                  ? (accountEmail.isNotEmpty
+                      ? '$accountEmail · прогресс синхронизируется'
+                      : 'Прогресс связан с аккаунтом')
                   : 'Подключи Google, чтобы сохранить доступ к аккаунту на других устройствах'),
               ),
               if (!registered)
