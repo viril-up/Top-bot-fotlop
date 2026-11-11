@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pdfx/pdfx.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/state/viril_controller.dart';
 import '../../core/theme/viril_theme.dart';
