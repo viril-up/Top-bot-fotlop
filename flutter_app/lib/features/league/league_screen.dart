@@ -19,6 +19,8 @@ class _LeagueScreenState extends State<LeagueScreen> {
   List<Map<String, dynamic>> _rows = [];
   Map<String, dynamic>? _mine;
   int? _myRank;
+  late bool _wasRegistered;
+  late int _lastXp;
 
   String _league(int xp) => xp >= 10000 ? 'Легенда'
       : xp >= 5000 ? 'Алмаз'
@@ -46,7 +48,26 @@ class _LeagueScreenState extends State<LeagueScreen> {
   @override
   void initState() {
     super.initState();
+    _wasRegistered = widget.controller.isRegistered;
+    _lastXp = widget.controller.state.xp;
+    widget.controller.addListener(_onControllerChanged);
     _load();
+  }
+
+  void _onControllerChanged() {
+    final registered = widget.controller.isRegistered;
+    final xp = widget.controller.state.xp;
+    if (registered != _wasRegistered || xp != _lastXp) {
+      _wasRegistered = registered;
+      _lastXp = xp;
+      _load();
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onControllerChanged);
+    super.dispose();
   }
 
   Future<void> _load() async {
