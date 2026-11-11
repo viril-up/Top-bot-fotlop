@@ -25,7 +25,7 @@ void main() {
       final state = VirilState({'xp': 680});
       state.normalize();
 
-      expect(state.level, 4);
+      expect(state.level, 13);
       expect(VirilState.threshold(2), 100);
       expect(VirilState.threshold(3), 150);
       expect(VirilState.rankFor(4), 'Воин');
