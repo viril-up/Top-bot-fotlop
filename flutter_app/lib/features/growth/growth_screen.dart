@@ -132,8 +132,8 @@ class _GrowthScreenState extends State<GrowthScreen> {
                   icon: const Icon(Icons.add, size: 17), label: const Text('Добавить')),
               ]),
               if (goals.isEmpty)
-                Card(
-                  child: const Padding(
+                const Card(
+                  child: Padding(
                     padding: EdgeInsets.all(18),
                     child: Column(children: [
                       Icon(Icons.flag_outlined, color: VirilTheme.blue, size: 26),
