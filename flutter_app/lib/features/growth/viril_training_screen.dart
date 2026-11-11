@@ -717,7 +717,9 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTi
           title: const Text('Viril Training', style: TextStyle(fontWeight: FontWeight.w800)),
           actions: [
             IconButton(
-              tooltip: 'Импортировать векторные анимации',
+              tooltip: _artImportedCount > 0
+                  ? 'Подключено анимаций: $_artImportedCount. Нажми, чтобы импортировать ещё'
+                  : 'Импортировать векторные анимации',
               onPressed: _importAnimations,
               icon: const Icon(Icons.animation_rounded),
             ),
