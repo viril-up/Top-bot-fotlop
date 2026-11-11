@@ -32,7 +32,7 @@ jobs:
           cp ../resources/icon.png assets/app_icon.png
           cp ../resources/splash.png assets/app_splash.png
           cp ../resources/profile-cover.jpg assets/profile-cover.jpg
-          cp ../books/*.fb2 assets/books/
+          cp ../books/118-dumay-medlenno-reshay-byistro.fb2 assets/books/\n          cp ../books/148322-samyiy-bogatyiy-chelovek-v-vavilone.fb2 assets/books/\n          cp ../books/810-chernyiy-lebed-pod-znakom-nepredskazuemosti-sbornik.fb2 assets/books/\n          cp ../books/8365-stoitsizm-na-kazhdyiy-den-366-razmyishleniy-o-mudrosti-vole-i-iskusstv.fb2 assets/books/
           flutter create --platforms=android .
           python3 - <<'PY'
           from pathlib import Path
