@@ -7,8 +7,9 @@ import '../../core/state/viril_controller.dart';
 import '../../core/theme/viril_theme.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.controller});
+  const HomeScreen({super.key, required this.controller, this.onNavigate});
   final VirilController controller;
+  final ValueChanged<int>? onNavigate;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -207,8 +208,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       _MiniFeature(icon: Icons.menu_book_rounded, title: 'Дневник мыслей', caption: 'Записывай идеи', onTap: _addDiaryEntry),
                       _MiniFeature(icon: Icons.timer_outlined, title: 'Фокус', caption: 'Работа и отдых', onTap: _openFocus),
-                      const _MiniFeature(icon: Icons.bar_chart_rounded, title: 'Аналитика', caption: 'Изучай прогресс'),
-                      const _MiniFeature(icon: Icons.fitness_center_rounded, title: 'Тренировки', caption: 'Развивай силу'),
+                      _MiniFeature(icon: Icons.bar_chart_rounded, title: 'Аналитика', caption: 'Изучай прогресс', onTap: () => widget.onNavigate?.call(3)),
+                      _MiniFeature(icon: Icons.fitness_center_rounded, title: 'Тренировки', caption: 'Открой каталог', onTap: () => widget.onNavigate?.call(2)),
                     ],
                   ),
                   const SizedBox(height: 12),
