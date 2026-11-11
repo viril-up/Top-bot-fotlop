@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/models/viril_state.dart';
 import '../../core/state/viril_controller.dart';
 import '../../core/theme/viril_theme.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key, required this.controller});
+  const ProfileScreen({super.key, required this.controller, this.onNavigate});
   final VirilController controller;
+  final ValueChanged<int>? onNavigate;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -17,6 +19,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     '🧠', '🏋️', '🧘', '📚', '⚡', '🌱', '🏹', '🛡️', '🔥', '🎯',
     '🦉', '⛰️', '🌊', '☀️', '🧭', '💎', '🚀', '🪷', '🐺', '♟️',
   ];
+
+  Future<void> _openExternal(String target) async {
+    final opened = await launchUrl(Uri.parse(target), mode: LaunchMode.externalApplication);
+    if (!opened && mounted) _message('Не удалось открыть ссылку');
+  }
 
   void _message(String value) {
     ScaffoldMessenger.of(context)
@@ -174,9 +181,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(color: Colors.white12),
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft, end: Alignment.bottomRight,
-                  colors: [Color(0xFF202B45), Color(0xFF151A2C)],
+                image: const DecorationImage(
+                  image: AssetImage('assets/profile-cover.jpg'),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(Color(0x99080D18), BlendMode.darken),
                 ),
               ),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -251,12 +259,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   icon: const Icon(Icons.login),
                   label: const Text('Подключить Google'),
                 )),
-              if (registered)
-                ListTile(
+              ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.switch_account_outlined),
-                  title: const Text('Сменить аккаунт'),
-                  subtitle: const Text('Создать новую гостевую сессию'),
+                  title: const Text('Выйти / сменить пользователя'),
+                  subtitle: const Text('Переключиться на новую гостевую сессию'),
                   onTap: () => _confirmAction(
                     title: 'Сменить аккаунт?',
                     message: 'Текущий прогресс будет сохранён. После смены аккаунта откроется новый гостевой профиль.',
@@ -264,6 +271,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onConfirm: widget.controller.changeAccount,
                   ),
                 ),
+            ]),
+            const SizedBox(height: 12),
+            _section('Лига', [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.emoji_events_outlined, color: VirilTheme.blue),
+                title: const Text('Глобальная лига'),
+                subtitle: const Text('Мировой рейтинг и сезонные рекорды'),
+                onTap: () => widget.onNavigate?.call(4),
+              ),
             ]),
             const SizedBox(height: 12),
             _section('Настройки', [
@@ -319,6 +336,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Text('Локальные данные и сохранённые материалы доступны без интернета. Облачная синхронизация требует подключения.',
                     style: TextStyle(color: Colors.white60, height: 1.45)),
                 )],
+              ),
+              const ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                title: Text('Как изменить имя и аватар?'),
+                children: [Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: Text('Открой редактирование профиля, выбери никнейм и аватар, затем сохрани изменения.',
+                    style: TextStyle(color: Colors.white60, height: 1.45)),
+                )],
+              ),
+              const ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                title: Text('Как попасть в мировой рейтинг?'),
+                children: [Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: Text('Подключи Google и выполняй цели. Рейтинг обновляется по данным твоего профиля.',
+                    style: TextStyle(color: Colors.white60, height: 1.45)),
+                )],
+              ),
+            ]),
+            const SizedBox(height: 12),
+            _section('Поддержка', [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.mail_outline, color: VirilTheme.blue),
+                title: const Text('Поддержка'),
+                subtitle: const Text('VirilSupport@gmail.com'),
+                onTap: () => _openExternal('mailto:VirilSupport@gmail.com?subject=Viril%20Support'),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.telegram, color: VirilTheme.blue),
+                title: const Text('Менеджер TG'),
+                subtitle: const Text('@virilgo'),
+                onTap: () => _openExternal('https://t.me/virilgo'),
               ),
             ]),
             const SizedBox(height: 12),
