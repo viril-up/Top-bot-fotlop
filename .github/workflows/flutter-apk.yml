@@ -129,6 +129,15 @@ jobs:
               '<item><bitmap android:gravity="center" android:src="@drawable/launch_image"/></item>'
               '</layer-list>', encoding="utf-8"
           )
+          drawable_v21 = res / "drawable-v21"
+          drawable_v21.mkdir(parents=True, exist_ok=True)
+          (drawable_v21 / "launch_background.xml").write_text(
+              '<?xml version="1.0" encoding="utf-8"?>'
+              '<layer-list xmlns:android="http://schemas.android.com/apk/res/android">'
+              '<item android:drawable="@drawable/ic_launcher_background"/>'
+              '<item><bitmap android:gravity="center" android:src="@drawable/launch_image"/></item>'
+              '</layer-list>', encoding="utf-8"
+          )
 
           values = res / "values"
           values.mkdir(parents=True, exist_ok=True)
