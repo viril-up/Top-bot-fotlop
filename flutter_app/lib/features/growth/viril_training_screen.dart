@@ -91,6 +91,12 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTi
   int _artImportedCount = 0;
   String? _loadError;
 
+  int get _requiredArtCount => _exercises
+      .map((exercise) => exercise.art)
+      .where((slug) => slug.isNotEmpty)
+      .toSet()
+      .length;
+
   List<Map<String, dynamic>> get _queue =>
       (_training['queue'] as List? ?? const [])
           .whereType<Map>()
@@ -825,9 +831,7 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTi
           title: const Text('Viril Training', style: TextStyle(fontWeight: FontWeight.w800)),
           actions: [
             IconButton(
-              tooltip: _artImportedCount > 0
-                  ? 'Подключено анимаций: $_artImportedCount. Нажми, чтобы импортировать ещё'
-                  : 'Импортировать векторные анимации',
+              tooltip: 'Подключено $_artImportedCount из $_requiredArtCount векторных анимаций. Нажми, чтобы импортировать архив',
               onPressed: _importAnimations,
               icon: const Icon(Icons.animation_rounded),
             ),
@@ -844,7 +848,7 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTi
           ),
         ),
         body: Column(children: [
-          if (_artImportedCount == 0)
+          if (_artImportedCount < _requiredArtCount)
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
               child: Card(
@@ -854,7 +858,7 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTi
                     const Icon(Icons.animation_rounded, color: VirilTheme.blue, size: 25),
                     const SizedBox(width: 10),
                     const Expanded(child: Text(
-                      'Подключи ZIP-архив векторных анимаций, чтобы увидеть иллюстрации движений упражнений.',
+                      'Подключено $_artImportedCount из $_requiredArtCount векторных анимаций. Импортируй архив Viril Training, чтобы открыть иллюстрации движений упражнений.',
                       style: TextStyle(color: Colors.white70, fontSize: 11, height: 1.35),
                     )),
                     TextButton(onPressed: _importAnimations, child: const Text('Импорт')),
