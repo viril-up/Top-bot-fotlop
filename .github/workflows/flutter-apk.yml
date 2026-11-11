@@ -30,6 +30,7 @@ jobs:
         run: |
           mkdir -p assets
           cp ../resources/icon.png assets/app_icon.png
+          cp ../resources/profile-cover.jpg assets/profile-cover.jpg
           flutter create --platforms=android .
           python3 - <<'PY'
           from pathlib import Path
