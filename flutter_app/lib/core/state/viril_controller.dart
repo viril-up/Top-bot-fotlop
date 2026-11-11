@@ -136,6 +136,20 @@ class VirilController extends ChangeNotifier {
     await persist();
   }
 
+  Future<void> awardTrainingXp(int amount, {required String label, int reps = 0}) async {
+    if (amount <= 0) return;
+    state.data['xp'] = state.xp + amount;
+    state.markActivity();
+    state.normalize();
+    await persist(immediate: true);
+  }
+
+  Future<void> recordFocusSession() async {
+    state.data['focusSessions'] =
+        ((state.data['focusSessions'] as num?)?.toInt() ?? 0) + 1;
+    await persist(immediate: true);
+  }
+
   Future<void> setLanguage(String language) async {
     state.data['language'] = language;
     await persist();
