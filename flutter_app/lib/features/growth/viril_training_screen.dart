@@ -3,9 +3,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/state/viril_controller.dart';
+import 'exercise_art.dart';
 import '../../core/theme/viril_theme.dart';
 
 class TrainingExercise {
@@ -86,6 +88,7 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTi
   String _equipmentFilter = '';
   int _catalogLimit = 48;
   bool _loading = true;
+  int _artImportedCount = 0;
   String? _loadError;
 
   List<Map<String, dynamic>> get _queue =>
@@ -124,6 +127,7 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTi
         await rootBundle.loadString('assets/data/programs.json'),
       ) as List;
       final prefs = await SharedPreferences.getInstance();
+      _artImportedCount = prefs.getInt('viril_art_asset_count') ?? 0;
       final raw = prefs.getString(_storageKey);
       if (raw != null) {
         final saved = jsonDecode(raw);
@@ -148,6 +152,35 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTi
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_storageKey, jsonEncode(_training));
     if (mounted) setState(() {});
+  }
+
+
+  Future<void> _importAnimations() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const ['zip'],
+        withData: true,
+      );
+      if (result == null || result.files.isEmpty) return;
+      final bytes = result.files.single.bytes;
+      if (bytes == null || bytes.isEmpty) {
+        throw StateError('Не удалось прочитать выбранный архив.');
+      }
+      final count = await ArtArchiveImporter.importBytes(bytes);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('viril_art_asset_count', count);
+      if (!mounted) return;
+      setState(() => _artImportedCount = count);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Подключено векторных анимаций: $count')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Не удалось импортировать архив: $error')),
+      );
+    }
   }
 
   String _normal(String value) =>
@@ -218,8 +251,8 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTi
                     color: VirilTheme.background,
                     borderRadius: BorderRadius.circular(18),
                   ),
-                  child: const Center(
-                    child: Icon(Icons.motion_photos_auto_rounded, color: VirilTheme.blue, size: 54),
+                  child: Center(
+                    child: ArtAnimationWidget(slug: exercise.art, size: 142),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -481,7 +514,7 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTi
                 leading: Container(
                   width: 46, height: 46,
                   decoration: BoxDecoration(color: VirilTheme.background, borderRadius: BorderRadius.circular(13)),
-                  child: const Icon(Icons.fitness_center_rounded, color: VirilTheme.blue),
+                  child: ArtAnimationWidget(slug: exercise.art, size: 46),
                 ),
                 title: Text(exercise.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                 subtitle: Text('${_muscles[exercise.primary] ?? exercise.primary} · ${_difficulty[exercise.difficulty] ?? exercise.difficulty}',
@@ -682,6 +715,13 @@ class _VirilTrainingScreenState extends State<VirilTrainingScreen> with SingleTi
     return Scaffold(
         appBar: AppBar(
           title: const Text('Viril Training', style: TextStyle(fontWeight: FontWeight.w800)),
+          actions: [
+            IconButton(
+              tooltip: 'Импортировать векторные анимации',
+              onPressed: _importAnimations,
+              icon: const Icon(Icons.animation_rounded),
+            ),
+          ],
           bottom: TabBar(
             controller: _tabs,
             isScrollable: true,
