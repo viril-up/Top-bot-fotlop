@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: period,
+                initialValue: period,
                 decoration: const InputDecoration(labelText: 'Период'),
                 items: const [
                   DropdownMenuItem(value: 'day', child: Text('На сегодня')),
@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ]),
               const SizedBox(height: 8),
               DropdownButtonFormField<int>(
-                value: penalty,
+                initialValue: penalty,
                 decoration: const InputDecoration(labelText: 'Штраф за невыполнение'),
                 items: const [
                   DropdownMenuItem(value: 5, child: Text('−5 XP')),
