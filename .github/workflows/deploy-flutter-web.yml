@@ -87,6 +87,10 @@ jobs:
         with:
           path: dist
 
+      - name: Wait for Pages artifact metadata
+        if: steps.check.outputs.ready == 'true'
+        run: sleep 15
+
       - name: Deploy to GitHub Pages
         if: steps.check.outputs.ready == 'true'
         id: deployment
