@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'core/data/legacy_storage_probe.dart';
 import 'core/data/viril_repository.dart';
 import 'core/state/viril_controller.dart';
 import 'core/theme/viril_theme.dart';
@@ -15,6 +18,7 @@ class VirilApp extends StatefulWidget {
 
 class _VirilAppState extends State<VirilApp> {
   late final VirilController controller;
+  final Completer<Map<String, String>> _legacyStorage = Completer();
   late final Future<void> initialization;
 
   @override
@@ -23,7 +27,24 @@ class _VirilAppState extends State<VirilApp> {
     controller = VirilController(
       VirilRepository(Supabase.instance.client),
     );
-    initialization = controller.initialize();
+    initialization = _bootstrap();
+  }
+
+  Future<void> _bootstrap() async {
+    Map<String, String> legacy = const {};
+    try {
+      legacy = await _legacyStorage.future.timeout(const Duration(seconds: 4));
+    } catch (_) {
+      // A fresh install or unsupported WebView simply starts without import.
+    }
+    await Future.wait([
+      controller.initialize(legacyStorage: legacy),
+      Future<void>.delayed(const Duration(seconds: 1)),
+    ]);
+  }
+
+  void _onLegacyStorage(Map<String, String> values) {
+    if (!_legacyStorage.isCompleted) _legacyStorage.complete(values);
   }
 
   @override
@@ -38,14 +59,34 @@ class _VirilAppState extends State<VirilApp> {
       title: 'Viril',
       debugShowCheckedModeBanner: false,
       theme: VirilTheme.dark,
-      home: FutureBuilder<void>(
-        future: initialization,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const _VirilSplash();
-          }
-          return VirilShell(controller: controller);
-        },
+      home: Stack(
+        children: [
+          Positioned.fill(
+            child: FutureBuilder<void>(
+              future: initialization,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const _VirilSplash();
+                }
+                return VirilShell(controller: controller);
+              },
+            ),
+          ),
+          Positioned(
+            left: 0,
+            top: 0,
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: 0.01,
+                child: SizedBox(
+                  width: 1,
+                  height: 1,
+                  child: LegacyStorageProbe(onLoaded: _onLegacyStorage),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
